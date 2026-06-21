@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}{{ asset.asset_id }} - Church Asset Manager{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+    <div>
+        <h1 class="h2">{{ asset.asset_id }}</h1>
+        <p class="text-body-secondary mb-0">{{ asset.description }}</p>
+    </div>
+    <div class="btn-group">
+        {% if current_user.can_manage_assets() %}
+        <a class="btn btn-outline-primary" href="{{ url_for('assets.edit_asset', asset_id=asset.asset_id) }}">Edit</a>
+        <a class="btn btn-outline-primary" href="{{ url_for('checkouts.create', asset_id=asset.asset_id) }}">Check Out</a>
+        {% if asset.status == 'Checked Out' %}<a class="btn btn-outline-primary" href="{{ url_for('checkouts.return_asset', asset_id=asset.asset_id) }}">Check In</a>{% endif %}
+        <a class="btn btn-outline-primary" href="{{ url_for('maintenance.create', asset_id=asset.asset_id) }}">Maintenance</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4">
+    <section class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        {% if asset.primary_photo %}
+                        <img class="asset-photo" src="{{ url_for('static', filename='uploads/' ~ asset.primary_photo.thumbnail_filename) }}" alt="{{ asset.description }}">
+                        {% else %}
+                        <div class="asset-photo placeholder">No Photo</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4">Status</dt><dd class="col-sm-8">{{ asset.status }}</dd>
+                            <dt class="col-sm-4">Condition</dt><dd class="col-sm-8">{{ asset.condition }}</dd>
+                            <dt class="col-sm-4">Department</dt><dd class="col-sm-8">{{ asset.department }}</dd>
+                            <dt class="col-sm-4">Assigned To</dt><dd class="col-sm-8">{{ asset.assigned_user.full_name if asset.assigned_user else 'Unassigned' }}</dd>
+                            <dt class="col-sm-4">Location</dt><dd class="col-sm-8">{{ asset.current_location or '' }}</dd>
+                            <dt class="col-sm-4">Serial</dt><dd class="col-sm-8">{{ asset.serial_number or '' }}</dd>
+                            <dt class="col-sm-4">Warranty</dt><dd class="col-sm-8">{{ asset.warranty_provider or '' }} {{ asset.warranty_expiration_date or '' }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="h5">Checkout History</h2>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead><tr><th>User</th><th>Out</th><th>Due</th><th>Returned</th><th>Condition</th></tr></thead>
+                        <tbody>
+                        {% for item in asset.checkouts|sort(attribute='checked_out_at', reverse=true) %}
+                        <tr class="{% if item.condition_worsened %}table-warning{% endif %}">
+                            <td>{{ item.user_receiving.full_name }}</td>
+                            <td>{{ item.checked_out_at.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ item.expected_return_date or '' }}</td>
+                            <td>{{ item.returned_at.strftime('%Y-%m-%d') if item.returned_at else '' }}</td>
+                            <td>{{ item.checkout_condition }}{% if item.return_condition %} → {{ item.return_condition }}{% endif %}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5">No checkout history.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h5">Maintenance History</h2>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Cost</th><th>By</th></tr></thead>
+                        <tbody>
+                        {% for item in asset.maintenance_records|sort(attribute='service_date', reverse=true) %}
+                        <tr>
+                            <td>{{ item.service_date }}</td>
+                            <td>{{ item.maintenance_type }}</td>
+                            <td>{{ item.description }}</td>
+                            <td>{{ item.cost or '' }}</td>
+                            <td>{{ item.performed_by.full_name }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5">No maintenance records.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <aside class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <h2 class="h5">Barcode</h2>
+                <img class="barcode-img" src="{{ url_for('assets.barcode', asset_id=asset.asset_id) }}" alt="Barcode for {{ asset.asset_id }}">
+                <div class="fw-bold mt-2">{{ asset.asset_id }}</div>
+                <a class="btn btn-outline-secondary btn-sm mt-3" href="{{ url_for('assets.barcode', asset_id=asset.asset_id, download='1') }}">Download Barcode</a>
+            </div>
+        </div>
+        <div class="card mb-4 label-preview">
+            <div class="card-body text-center">
+                <div class="small text-body-secondary">2 in x 1 in label preview</div>
+                <img src="{{ url_for('assets.barcode', asset_id=asset.asset_id) }}" alt="">
+                <div>{{ asset.asset_id }}</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h5">Documents</h2>
+                <ul class="mb-0">
+                    {% for doc in asset.documents %}
+                    <li><a href="{{ url_for('static', filename='uploads/' ~ doc.stored_filename) }}">{{ doc.original_filename }}</a></li>
+                    {% else %}
+                    <li class="text-body-secondary">No documents uploaded.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Check In {{ asset.asset_id }}{% endblock %}
+{% block content %}
+<h1 class="h2 mb-3">Check In {{ asset.asset_id }}</h1>
+<form class="card card-body" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="row g-3">
+        <div class="col-md-4"><label class="form-label">Return Condition</label><select class="form-select" name="return_condition" required>{% for condition in ['Excellent','Good','Fair','Poor','Damaged'] %}<option value="{{ condition }}">{{ condition }}</option>{% endfor %}</select></div>
+        <div class="col-12"><label class="form-label">Return Notes</label><textarea class="form-control" name="return_notes" required></textarea></div>
+    </div>
+    <div class="mt-3"><button class="btn btn-primary" type="submit">Check In Asset</button></div>
+</form>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Users - Church Asset Manager{% endblock %}
+{% block content %}
+<h1 class="h2 mb-3">Users</h1>
+
+<div class="card card-body mb-4">
+    <h2 class="h5">Create User</h2>
+    <form method="post" action="{{ url_for('users.create') }}">
+        {{ form.hidden_tag() }}
+        <div class="row g-3">
+            <div class="col-md-3">{{ form.first_name.label(class="form-label") }}{{ form.first_name(class="form-control") }}</div>
+            <div class="col-md-3">{{ form.last_name.label(class="form-label") }}{{ form.last_name(class="form-control") }}</div>
+            <div class="col-md-3">{{ form.email.label(class="form-label") }}{{ form.email(class="form-control") }}</div>
+            <div class="col-md-3">{{ form.phone.label(class="form-label") }}{{ form.phone(class="form-control") }}</div>
+            <div class="col-md-3">{{ form.password.label(class="form-label") }}{{ form.password(class="form-control") }}</div>
+            <div class="col-md-3">{{ form.confirm_password.label(class="form-label") }}{{ form.confirm_password(class="form-control") }}</div>
+            {% if current_user.role == 'administrator' %}
+            <div class="col-md-3"><label class="form-label">Role</label><select class="form-select" name="role"><option value="viewer">Viewer</option><option value="moderator">Moderator</option><option value="administrator">Administrator</option></select></div>
+            {% endif %}
+            <div class="col-md-3 d-flex align-items-end">{{ form.submit(class="btn btn-primary") }}</div>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Last Login</th><th>Actions</th></tr></thead>
+            <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.full_name }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.phone or '' }}</td>
+                <td>{{ user.role|title }}</td>
+                <td>{{ user.last_login_at.strftime('%Y-%m-%d') if user.last_login_at else '' }}</td>
+                <td class="d-flex gap-2">
+                    {% if current_user.role == 'administrator' %}
+                    <form method="post" action="{{ url_for('users.update_role', user_id=user.id) }}" class="d-flex gap-2">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <select class="form-select form-select-sm" name="role">{% for role in ['viewer','moderator','administrator'] %}<option value="{{ role }}" {% if user.role == role %}selected{% endif %}>{{ role|title }}</option>{% endfor %}</select>
+                        <button class="btn btn-sm btn-outline-primary" type="submit">Save</button>
+                    </form>
+                    <form method="post" action="{{ url_for('users.disable', user_id=user.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-danger" type="submit">Disable</button></form>
+                    {% endif %}
+                    {% if current_user.role in ['administrator', 'moderator'] %}
+                    <form method="post" action="{{ url_for('users.reset_password', user_id=user.id) }}" class="d-flex gap-2">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input class="form-control form-control-sm" type="password" name="password" placeholder="New password">
+                        <button class="btn btn-sm btn-outline-secondary" type="submit">Reset</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

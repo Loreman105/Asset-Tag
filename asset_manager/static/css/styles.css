@@ -1,0 +1,89 @@
+body {
+    min-height: 100vh;
+}
+
+.page-shell {
+    max-width: 1440px;
+    padding: 24px;
+}
+
+.login-page {
+    align-items: center;
+    background: #f4f6f8;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.login-card {
+    width: min(420px, calc(100vw - 32px));
+}
+
+.metric {
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 8px;
+    min-height: 112px;
+    padding: 16px;
+}
+
+.metric span {
+    color: var(--bs-secondary-color);
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.metric strong {
+    display: block;
+    font-size: 34px;
+    line-height: 1;
+    margin-top: 12px;
+}
+
+.asset-photo {
+    aspect-ratio: 4 / 3;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 8px;
+    object-fit: cover;
+    width: 100%;
+}
+
+.asset-photo.placeholder {
+    align-items: center;
+    color: var(--bs-secondary-color);
+    display: flex;
+    justify-content: center;
+}
+
+.barcode-img {
+    max-width: 100%;
+}
+
+.label-preview {
+    margin: 0 auto 1.5rem;
+    max-width: 320px;
+}
+
+.label-preview .card-body {
+    aspect-ratio: 2 / 1;
+}
+
+.label-preview img {
+    max-height: 72px;
+    max-width: 100%;
+}
+
+@media print {
+    nav,
+    .btn,
+    .page-shell > .alert {
+        display: none !important;
+    }
+
+    .label-preview {
+        border: 0;
+        height: 1in;
+        width: 2in;
+    }
+}

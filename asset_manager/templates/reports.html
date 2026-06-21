@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Reports - Church Asset Manager{% endblock %}
+{% block content %}
+<h1 class="h2 mb-3">Reports</h1>
+{% if current_user.role == 'administrator' %}
+<div class="mb-3"><a class="btn btn-outline-secondary" href="{{ url_for('reports.audit_log') }}">View Audit Log</a></div>
+{% endif %}
+<div class="row g-3">
+    {% for key, title in [('inventory','Inventory Report'),('checkouts','Checkout Report'),('maintenance','Maintenance Report'),('warranty','Warranty Report'),('value','Asset Value Report')] %}
+    <div class="col-md-6 col-xl-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">{{ title }}</h2>
+                <div class="btn-group">
+                    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('reports.export', report_name=key, format='csv') }}">CSV</a>
+                    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('reports.export', report_name=key, format='xlsx') }}">Excel</a>
+                    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('reports.export', report_name=key, format='pdf') }}">PDF</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

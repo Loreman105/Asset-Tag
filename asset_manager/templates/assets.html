@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Assets - Church Asset Manager{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <div>
+        <h1 class="h2">Assets</h1>
+        <p class="text-body-secondary mb-0">Search by asset ID, description, manufacturer, model, serial number, or assigned user.</p>
+    </div>
+    {% if current_user.can_manage_assets() %}
+    <a class="btn btn-primary" href="{{ url_for('assets.create_asset') }}">Add Asset</a>
+    {% endif %}
+</div>
+
+<form class="card card-body mb-3" method="get">
+    <div class="row g-2">
+        <div class="col-lg-4"><input class="form-control" name="q" placeholder="Global search" value="{{ filters.get('q', '') }}"></div>
+        <div class="col-md-2">
+            <select class="form-select" name="department">
+                <option value="">Department</option>
+                {% for item in departments %}<option value="{{ item.name }}" {% if filters.get('department') == item.name %}selected{% endif %}>{{ item.name }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="status">
+                <option value="">Status</option>
+                {% for item in statuses %}<option value="{{ item.name }}" {% if filters.get('status') == item.name %}selected{% endif %}>{{ item.name }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="category">
+                <option value="">Asset Type</option>
+                {% for item in categories %}<option value="{{ item.name }}" {% if filters.get('category') == item.name %}selected{% endif %}>{{ item.name }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="warranty">
+                <option value="">Warranty</option>
+                <option value="expiring" {% if filters.get('warranty') == 'expiring' %}selected{% endif %}>Expiring</option>
+                <option value="expired" {% if filters.get('warranty') == 'expired' %}selected{% endif %}>Expired</option>
+            </select>
+        </div>
+        <div class="col-12"><button class="btn btn-outline-primary" type="submit">Filter</button></div>
+    </div>
+</form>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead><tr><th>Asset ID</th><th>Description</th><th>Department</th><th>Model</th><th>Status</th><th>Assigned</th></tr></thead>
+            <tbody>
+            {% for asset in assets %}
+            <tr>
+                <td><a href="{{ url_for('assets.detail', asset_id=asset.asset_id) }}">{{ asset.asset_id }}</a></td>
+                <td>{{ asset.description }}</td>
+                <td>{{ asset.department }}</td>
+                <td>{{ asset.model_number or '' }}</td>
+                <td><span class="badge text-bg-secondary">{{ asset.status }}</span></td>
+                <td>{{ asset.assigned_user.full_name if asset.assigned_user else 'Unassigned' }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="text-body-secondary">No assets found.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

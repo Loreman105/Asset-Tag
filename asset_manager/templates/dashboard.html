@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Church Asset Manager{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="h2">Dashboard</h1>
+        <p class="text-body-secondary mb-0">Inventory health, warranty alerts, and recent system activity.</p>
+    </div>
+    {% if current_user.can_manage_assets() %}
+    <div class="btn-group">
+        <a class="btn btn-primary" href="{{ url_for('assets.create_asset') }}">Add Asset</a>
+        <a class="btn btn-outline-primary" href="{{ url_for('assets.list_assets') }}">Search System</a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-2"><div class="metric"><span>Total</span><strong>{{ total_assets }}</strong></div></div>
+    {% for label, total in status_counts.items() %}
+    <div class="col-6 col-lg-2"><div class="metric"><span>{{ label }}</span><strong>{{ total }}</strong></div></div>
+    {% endfor %}
+</div>
+
+<div class="row g-4">
+    <section class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">Warranty Expiring Soon</h2>
+                <div class="list-group list-group-flush">
+                    {% for asset in warranty_alerts %}
+                    <a class="list-group-item list-group-item-action" href="{{ url_for('assets.detail', asset_id=asset.asset_id) }}">
+                        <strong>{{ asset.asset_id }}</strong> {{ asset.description }}
+                        <span class="d-block small text-body-secondary">{{ asset.warranty_expiration_date }}</span>
+                    </a>
+                    {% else %}
+                    <p class="text-body-secondary mb-0">No warranty alerts.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="col-lg-7">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">Recent Activity</h2>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead><tr><th>Action</th><th>Object</th><th>User</th><th>Time</th></tr></thead>
+                        <tbody>
+                        {% for item in recent_activity %}
+                        <tr>
+                            <td>{{ item.action }}</td>
+                            <td>{{ item.object_type }} {{ item.object_id }}</td>
+                            <td>{{ item.user.full_name if item.user else 'System' }}</td>
+                            <td>{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4">No activity yet.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

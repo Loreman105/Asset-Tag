@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Settings - Church Asset Manager{% endblock %}
+{% block content %}
+<h1 class="h2 mb-3">Settings</h1>
+<div class="row g-4">
+    <section class="col-lg-6">
+        <div class="card card-body mb-4">
+            <h2 class="h5">Church</h2>
+            <form method="post" class="row g-2">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="church">
+                <div class="col"><input class="form-control" name="church_name" value="{{ church_name }}"></div>
+                <div class="col-auto"><button class="btn btn-primary">Save</button></div>
+            </form>
+        </div>
+        <div class="card card-body">
+            <h2 class="h5">Department Prefixes</h2>
+            <form method="post" class="row g-2 mb-3">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="prefix">
+                <div class="col-3"><input class="form-control" name="code" placeholder="10" maxlength="2"></div>
+                <div class="col"><input class="form-control" name="name" placeholder="Department"></div>
+                <div class="col-auto"><button class="btn btn-primary">Add</button></div>
+            </form>
+            <ul>{% for item in prefixes %}<li>{{ item.code }} - {{ item.name }}</li>{% endfor %}</ul>
+        </div>
+    </section>
+    <section class="col-lg-6">
+        <div class="card card-body mb-4">
+            <h2 class="h5">Categories</h2>
+            <form method="post" class="row g-2 mb-3"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="category"><div class="col"><input class="form-control" name="name"></div><div class="col-auto"><button class="btn btn-primary">Add</button></div></form>
+            <ul>{% for item in categories %}<li>{{ item.name }}</li>{% endfor %}</ul>
+        </div>
+        <div class="card card-body">
+            <h2 class="h5">Status Values</h2>
+            <form method="post" class="row g-2 mb-3"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="status"><div class="col"><input class="form-control" name="name"></div><div class="col-auto"><button class="btn btn-primary">Add</button></div></form>
+            <ul>{% for item in statuses %}<li>{{ item.name }}</li>{% endfor %}</ul>
+        </div>
+    </section>
+</div>
+{% endblock %}
