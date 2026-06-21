@@ -19,12 +19,21 @@
                 {{ form.hidden_tag() }}
                 <div class="mb-3">
                     {{ form.email.label(class="form-label") }}
-                    {{ form.email(class="form-control", value="admin@church.local") }}
+                    {{ form.email(class="form-control", placeholder="admin@church.local") }}
+                    {% for error in form.email.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
                 </div>
                 <div class="mb-3">
                     {{ form.password.label(class="form-label") }}
-                    {{ form.password(class="form-control", value="admin123456") }}
+                    {{ form.password(class="form-control") }}
+                    {% for error in form.password.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
                 </div>
+                {% for error in form.csrf_token.errors %}
+                    <div class="alert alert-danger py-2">{{ error }}</div>
+                {% endfor %}
                 <div class="form-check mb-3">
                     {{ form.remember(class="form-check-input") }}
                     {{ form.remember.label(class="form-check-label") }}
