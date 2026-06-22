@@ -19,6 +19,7 @@
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('assets.dashboard') }}">Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('assets.list_assets') }}">Assets</a></li>
                     {% if current_user.is_authenticated and current_user.can_manage_assets() %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('checkouts.quick') }}">Check In/Out</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('assets.create_asset') }}">Add Asset</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('reports.index') }}">Reports</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('users.list_users') }}">Users</a></li>

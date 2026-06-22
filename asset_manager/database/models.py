@@ -55,6 +55,9 @@ class User(UserMixin, db.Model):
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utc_now)
 
     assigned_assets = db.relationship("Asset", back_populates="assigned_user", foreign_keys="Asset.assigned_user_id")
+    department_permissions = db.relationship(
+        "UserDepartmentPermission", back_populates="user", cascade="all, delete-orphan"
+    )
 
     @property
     def is_active(self):
@@ -65,7 +68,29 @@ class User(UserMixin, db.Model):
         return f"{self.first_name} {self.last_name}"
 
     def can_manage_assets(self):
-        return self.role in {Role.ADMIN, Role.MODERATOR}
+        return self.role in {Role.ADMIN, Role.MODERATOR} or any(
+            permission.can_modify_assets for permission in self.department_permissions
+        )
+
+    def can_manage_department(self, department_name):
+        if self.role in {Role.ADMIN, Role.MODERATOR}:
+            return True
+        return any(
+            permission.can_modify_assets and permission.department.name == department_name
+            for permission in self.department_permissions
+        )
+
+    def can_manage_asset(self, asset):
+        return self.can_manage_department(asset.department)
+
+    def manageable_department_names(self):
+        if self.role in {Role.ADMIN, Role.MODERATOR}:
+            return None
+        return {
+            permission.department.name
+            for permission in self.department_permissions
+            if permission.can_modify_assets
+        }
 
     def can_manage_settings(self):
         return self.role == Role.ADMIN
@@ -81,6 +106,18 @@ class DepartmentPrefix(db.Model):
     code = db.Column(db.String(2), nullable=False, unique=True)
     name = db.Column(db.String(120), nullable=False, unique=True)
     is_active = db.Column(db.Boolean, nullable=False, default=True)
+
+
+class UserDepartmentPermission(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    department_id = db.Column(db.Integer, db.ForeignKey("department_prefix.id"), nullable=False)
+    can_modify_assets = db.Column(db.Boolean, nullable=False, default=True)
+
+    user = db.relationship("User", back_populates="department_permissions")
+    department = db.relationship("DepartmentPrefix")
+
+    __table_args__ = (db.UniqueConstraint("user_id", "department_id", name="uq_user_department_permission"),)
 
 
 class Category(db.Model):
