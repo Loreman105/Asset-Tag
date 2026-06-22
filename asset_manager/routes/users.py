@@ -66,6 +66,17 @@ def disable(user_id):
     return redirect(url_for("users.list_users"))
 
 
+@bp.route("/<int:user_id>/enable", methods=("POST",))
+@roles_required(Role.ADMIN)
+def enable(user_id):
+    user = User.query.get_or_404(user_id)
+    user.is_active_account = True
+    db.session.commit()
+    log_activity(current_user.id, "Account Enable", "User", user.id, user.email)
+    flash("User enabled.", "success")
+    return redirect(url_for("users.list_users"))
+
+
 @bp.route("/<int:user_id>/reset-password", methods=("POST",))
 @roles_required(Role.ADMIN, Role.MODERATOR)
 def reset_password(user_id):

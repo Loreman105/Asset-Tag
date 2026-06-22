@@ -41,7 +41,12 @@
                         <select class="form-select form-select-sm" name="role">{% for role in ['viewer','moderator','administrator'] %}<option value="{{ role }}" {% if user.role == role %}selected{% endif %}>{{ role|title }}</option>{% endfor %}</select>
                         <button class="btn btn-sm btn-outline-primary" type="submit">Save</button>
                     </form>
-                    <form method="post" action="{{ url_for('users.disable', user_id=user.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-danger" type="submit">Disable</button></form>
+                    <form method="post" action="{{ url_for('users.disable' if user.is_active_account else 'users.enable', user_id=user.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-sm {{ 'btn-outline-danger' if user.is_active_account else 'btn-outline-success' }}" type="submit">
+                            {{ 'Disable' if user.is_active_account else 'Enable' }}
+                        </button>
+                    </form>
                     {% endif %}
                     {% if current_user.role in ['administrator', 'moderator'] %}
                     <form method="post" action="{{ url_for('users.reset_password', user_id=user.id) }}" class="d-flex gap-2">
