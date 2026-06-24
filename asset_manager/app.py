@@ -9,7 +9,8 @@ if __package__ is None:
 from flask import Flask, redirect, url_for
 
 from asset_manager.config import Config
-from asset_manager.database.db import seed_database
+from asset_manager.database.db import DEFAULT_COLOR_SETTINGS, seed_database
+from asset_manager.database.models import Setting
 from asset_manager.extensions import bcrypt, csrf, db, login_manager, migrate
 from asset_manager.routes.assets import bp as assets_bp
 from asset_manager.routes.auth import bp as auth_bp
@@ -49,11 +50,47 @@ def create_app(config_object=Config):
     def index():
         return redirect(url_for("assets.dashboard"))
 
+    @app.context_processor
+    def inject_theme_settings():
+        colors = DEFAULT_COLOR_SETTINGS.copy()
+        for setting in Setting.query.filter(Setting.key.in_(DEFAULT_COLOR_SETTINGS)).all():
+            if setting.value:
+                colors[setting.key] = setting.value
+        return {"theme_css": build_theme_css(colors)}
+
     with app.app_context():
         db.create_all()
         seed_database()
 
     return app
+
+
+def hex_to_rgb(value):
+    value = value.lstrip("#")
+    return ", ".join(str(int(value[index : index + 2], 16)) for index in (0, 2, 4))
+
+
+def build_theme_css(colors):
+    primary = colors["color_primary"]
+    accent = colors["color_accent"]
+    page_background = colors["color_page_background"]
+    nav_background = colors["color_nav_background"]
+    card_background = colors["color_card_background"]
+    body_text = colors["color_body_text"]
+    return f"""
+:root,
+[data-bs-theme="light"] {{
+    --bs-primary: {primary};
+    --bs-primary-rgb: {hex_to_rgb(primary)};
+    --bs-link-color: {accent};
+    --bs-link-color-rgb: {hex_to_rgb(accent)};
+    --bs-link-hover-color: color-mix(in srgb, {accent} 80%, #000000);
+    --bs-body-bg: {page_background};
+    --bs-body-color: {body_text};
+    --app-nav-bg: {nav_background};
+    --app-card-bg: {card_background};
+}}
+"""
 
 
 if __name__ == "__main__":
