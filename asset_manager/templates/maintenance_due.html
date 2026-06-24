@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Maintenance Due - Church Asset Manager{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <div>
+        <h1 class="h2">Maintenance Due</h1>
+        <p class="text-body-secondary mb-0">Scheduled service due today or coming soon.</p>
+    </div>
+</div>
+
+{% macro table_for(items, empty_text) %}
+<div class="card mb-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead><tr><th>Due</th><th>Asset</th><th>Type</th><th>Location</th><th>Notes</th><th></th></tr></thead>
+            <tbody>
+            {% for item in items %}
+            <tr class="{% if item.next_due_date <= today %}table-warning{% endif %}">
+                <td>{{ item.next_due_date }}</td>
+                <td><a href="{{ url_for('assets.detail', asset_id=item.asset.asset_id) }}">{{ item.asset.asset_id }}</a> - {{ item.asset.description }}</td>
+                <td>{{ item.service_type }}</td>
+                <td>{{ item.asset.current_location or '' }}</td>
+                <td>{{ item.notes or '' }}</td>
+                <td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('maintenance.create', asset_id=item.asset.asset_id) }}">Record Service</a></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="text-body-secondary">{{ empty_text }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endmacro %}
+
+<h2 class="h5">Due Now</h2>
+{{ table_for(due_now, 'No overdue maintenance.') }}
+<h2 class="h5">Next 30 Days</h2>
+{{ table_for(upcoming, 'No upcoming maintenance.') }}
+<h2 class="h5">Later</h2>
+{{ table_for(later, 'No later scheduled maintenance.') }}
+{% endblock %}

@@ -17,17 +17,40 @@
             <div class="collapse navbar-collapse" id="mainNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('assets.dashboard') }}">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('assets.list_assets') }}">Assets</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Assets</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('assets.list_assets') }}">Asset List</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('scanner.index') }}">Camera Scanner</a></li>
+                            {% if current_user.is_authenticated and current_user.can_manage_assets() %}
+                            <li><a class="dropdown-item" href="{{ url_for('assets.create_asset') }}">Add Asset</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin_tools.index') }}">Labels and Import</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
                     {% if current_user.is_authenticated and current_user.can_manage_assets() %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('checkouts.quick') }}">Check In/Out</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('reservations.index') }}">Reservations</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('reservations.audits') }}">Audit Mode</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('assets.create_asset') }}">Add Asset</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('reports.index') }}">Reports</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('users.list_users') }}">Users</a></li>
-                    {% endif %}
-                    {% if current_user.is_authenticated and current_user.can_manage_settings() %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('settings.index') }}">Settings</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Operations</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('checkouts.quick') }}">Check In/Out</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('asset_requests.index') }}">Requests</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('reservations.index') }}">Reservations</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('maintenance.due') }}">Maintenance Due</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('reservations.audits') }}">Audit Mode</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Admin</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('reports.index') }}">Reports</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('users.list_users') }}">Users</a></li>
+                            {% if current_user.is_authenticated and current_user.can_manage_settings() %}
+                            <li><a class="dropdown-item" href="{{ url_for('settings.index') }}">Settings</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('asset_requests.index') }}">Requests</a></li>
                     {% endif %}
                 </ul>
                 <div class="d-flex align-items-center gap-2">

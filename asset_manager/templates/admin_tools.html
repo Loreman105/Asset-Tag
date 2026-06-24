@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Labels and Import - Church Asset Manager{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <div>
+        <h1 class="h2">Labels and Import</h1>
+        <p class="text-body-secondary mb-0">Print batch labels, export inventory, or import a CSV update.</p>
+    </div>
+    <div class="btn-group">
+        <a class="btn btn-outline-primary" href="{{ url_for('admin_tools.export_assets') }}">Export CSV</a>
+        <a class="btn btn-outline-secondary" href="{{ url_for('admin_tools.template') }}">Import Template</a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <section class="col-xl-7">
+        <form class="card card-body" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="labels">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 mb-0">Batch Label Printing</h2>
+                <button class="btn btn-primary" type="submit">Print Selected Labels</button>
+            </div>
+            <div class="table-responsive label-picker">
+                <table class="table table-sm table-hover align-middle">
+                    <thead><tr><th><input class="form-check-input" type="checkbox" id="selectAllLabels"></th><th>Asset ID</th><th>Description</th><th>Department</th></tr></thead>
+                    <tbody>
+                    {% for asset in assets %}
+                    <tr>
+                        <td><input class="form-check-input label-check" type="checkbox" name="asset_ids" value="{{ asset.id }}"></td>
+                        <td>{{ asset.asset_id }}</td>
+                        <td>{{ asset.description }}</td>
+                        <td>{{ asset.department }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="text-body-secondary">No assets available.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    </section>
+    <section class="col-xl-5">
+        <form class="card card-body" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="import">
+            <h2 class="h5">CSV Import</h2>
+            <p class="text-body-secondary">Rows with an existing asset ID update that asset. Rows without an asset ID create a new asset when the department matches an active department.</p>
+            <input class="form-control" type="file" name="csv_file" accept=".csv" required>
+            <div class="mt-3"><button class="btn btn-primary" type="submit">Import CSV</button></div>
+        </form>
+
+        <div class="card card-body mt-4">
+            <h2 class="h5">Supported Fields</h2>
+            <div class="field-list">
+                {% for field in fields %}<code>{{ field }}</code>{% endfor %}
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

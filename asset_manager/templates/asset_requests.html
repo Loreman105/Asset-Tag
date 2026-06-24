@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Asset Requests - Church Asset Manager{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <div>
+        <h1 class="h2">Asset Requests</h1>
+        <p class="text-body-secondary mb-0">Submit equipment needs and review pending approvals.</p>
+    </div>
+    {% if current_user.can_manage_assets() %}
+    <span class="badge text-bg-primary">{{ pending_count }} pending</span>
+    {% endif %}
+</div>
+
+<div class="row g-4">
+    <section class="col-xl-4">
+        <form class="card card-body" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <h2 class="h5">New Request</h2>
+            <div class="mb-3">
+                <label class="form-label">Event name</label>
+                <input class="form-control" name="event_name" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Specific asset</label>
+                <select class="form-select" name="asset_id">
+                    <option value="">No specific asset</option>
+                    {% for asset in assets %}
+                    <option value="{{ asset.id }}">{{ asset.asset_id }} - {{ asset.description }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Requested equipment</label>
+                <input class="form-control" name="requested_asset_description" placeholder="Camera kit, laptop, projector...">
+            </div>
+            <div class="row g-2">
+                <div class="col-md-6"><label class="form-label">Start</label><input class="form-control" type="datetime-local" name="starts_at" required></div>
+                <div class="col-md-6"><label class="form-label">End</label><input class="form-control" type="datetime-local" name="ends_at" required></div>
+            </div>
+            <div class="mt-3">
+                <label class="form-label">Notes</label>
+                <textarea class="form-control" name="notes"></textarea>
+            </div>
+            <div class="mt-3"><button class="btn btn-primary" type="submit">Submit Request</button></div>
+        </form>
+    </section>
+
+    <section class="col-xl-8">
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead><tr><th>Event</th><th>Asset</th><th>Requested By</th><th>When</th><th>Status</th><th></th></tr></thead>
+                    <tbody>
+                    {% for item in requests %}
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">{{ item.event_name }}</div>
+                            <div class="small text-body-secondary">{{ item.requested_asset_description or item.notes or '' }}</div>
+                        </td>
+                        <td>{{ item.asset.asset_id ~ ' - ' ~ item.asset.description if item.asset else 'Flexible' }}</td>
+                        <td>{{ item.requested_by.full_name }}</td>
+                        <td>{{ item.starts_at.strftime('%Y-%m-%d %H:%M') }} to {{ item.ends_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td><span class="badge text-bg-secondary">{{ item.status }}</span></td>
+                        <td class="text-end">
+                            {% if current_user.can_manage_assets() and item.status == 'Pending' %}
+                            <div class="d-flex flex-wrap gap-2 justify-content-end">
+                                <form method="post" action="{{ url_for('asset_requests.approve', request_id=item.id) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    {% if not item.asset %}
+                                    <select class="form-select form-select-sm mb-2" name="asset_id" required>
+                                        <option value="">Assign asset</option>
+                                        {% for asset in assets %}
+                                        <option value="{{ asset.id }}">{{ asset.asset_id }} - {{ asset.description }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% endif %}
+                                    <button class="btn btn-sm btn-success" type="submit">Approve</button>
+                                </form>
+                                <form method="post" action="{{ url_for('asset_requests.deny', request_id=item.id) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button class="btn btn-sm btn-outline-danger" type="submit">Deny</button>
+                                </form>
+                            </div>
+                            {% elif item.reservation %}
+                            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('reservations.index') }}">Reservation</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="text-body-secondary">No requests yet.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

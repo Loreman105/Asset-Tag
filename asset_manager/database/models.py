@@ -286,6 +286,50 @@ class MaintenanceRecord(db.Model):
     performed_by = db.relationship("User")
 
 
+class MaintenanceSchedule(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    asset_id = db.Column(db.Integer, db.ForeignKey("asset.id"), nullable=False, unique=True)
+    next_due_date = db.Column(db.Date, nullable=False, index=True)
+    frequency_days = db.Column(db.Integer)
+    service_type = db.Column(db.String(80), nullable=False, default=MaintenanceType.INSPECTION)
+    notes = db.Column(db.Text)
+    updated_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now)
+    updated_by_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+
+    asset = db.relationship("Asset")
+    updated_by = db.relationship("User")
+
+
+class AssetRequestStatus:
+    PENDING = "Pending"
+    APPROVED = "Approved"
+    DENIED = "Denied"
+    FULFILLED = "Fulfilled"
+    CANCELLED = "Cancelled"
+
+
+class AssetRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    asset_id = db.Column(db.Integer, db.ForeignKey("asset.id"))
+    requested_by_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    reviewed_by_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    event_name = db.Column(db.String(160), nullable=False)
+    starts_at = db.Column(db.DateTime(timezone=True), nullable=False, index=True)
+    ends_at = db.Column(db.DateTime(timezone=True), nullable=False, index=True)
+    requested_asset_description = db.Column(db.String(255))
+    status = db.Column(db.String(40), nullable=False, default=AssetRequestStatus.PENDING, index=True)
+    notes = db.Column(db.Text)
+    review_notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utc_now)
+    reviewed_at = db.Column(db.DateTime(timezone=True))
+    reservation_id = db.Column(db.Integer, db.ForeignKey("reservation.id"))
+
+    asset = db.relationship("Asset")
+    requested_by = db.relationship("User", foreign_keys=[requested_by_id])
+    reviewed_by = db.relationship("User", foreign_keys=[reviewed_by_id])
+    reservation = db.relationship("Reservation")
+
+
 class AssetPhoto(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     asset_id = db.Column(db.Integer, db.ForeignKey("asset.id"), nullable=False)

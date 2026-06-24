@@ -11,6 +11,23 @@
         <div class="col-md-3 d-flex align-items-end"><div class="form-check"><input class="form-check-input" type="checkbox" name="mark_in_maintenance" value="1" id="maintFlag"><label class="form-check-label" for="maintFlag">Mark in maintenance</label></div></div>
         <div class="col-12"><label class="form-label">Description</label><textarea class="form-control" name="description" required></textarea></div>
         <div class="col-12"><label class="form-label">Notes</label><textarea class="form-control" name="notes"></textarea></div>
+        <div class="col-12"><hr></div>
+        <div class="col-md-3">
+            <label class="form-label">Next due date</label>
+            <input class="form-control" type="date" name="next_due_date" value="{{ schedule.next_due_date if schedule else '' }}">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Repeat every days</label>
+            <input class="form-control" type="number" min="1" name="frequency_days" value="{{ schedule.frequency_days if schedule and schedule.frequency_days else '' }}">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Next service type</label>
+            <select class="form-select" name="next_service_type">{% for type in types %}<option value="{{ type }}" {% if schedule and schedule.service_type == type %}selected{% endif %}>{{ type }}</option>{% endfor %}</select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <div class="form-check"><input class="form-check-input" type="checkbox" name="use_frequency" value="1" id="useFrequency"><label class="form-check-label" for="useFrequency">Calculate from frequency</label></div>
+        </div>
+        <div class="col-12"><label class="form-label">Schedule notes</label><textarea class="form-control" name="schedule_notes">{{ schedule.notes if schedule else '' }}</textarea></div>
     </div>
     <div class="mt-3"><button class="btn btn-primary" type="submit">Add Maintenance Record</button></div>
 </form>

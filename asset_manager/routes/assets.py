@@ -57,7 +57,15 @@ def dashboard():
         .limit(10)
         .all()
     )
-    from asset_manager.database.models import AuditLog, Checkout, Reservation, ReservationStatus
+    from asset_manager.database.models import (
+        AssetRequest,
+        AssetRequestStatus,
+        AuditLog,
+        Checkout,
+        MaintenanceSchedule,
+        Reservation,
+        ReservationStatus,
+    )
 
     overdue_checkouts = (
         Checkout.query.filter(
@@ -78,6 +86,18 @@ def dashboard():
         .limit(10)
         .all()
     )
+    maintenance_due = (
+        MaintenanceSchedule.query.filter(MaintenanceSchedule.next_due_date <= date.today() + timedelta(days=30))
+        .order_by(MaintenanceSchedule.next_due_date)
+        .limit(10)
+        .all()
+    )
+    pending_requests = (
+        AssetRequest.query.filter_by(status=AssetRequestStatus.PENDING)
+        .order_by(AssetRequest.created_at.desc())
+        .limit(10)
+        .all()
+    )
 
     recent_activity = AuditLog.query.order_by(AuditLog.created_at.desc()).limit(20).all()
     return render_template(
@@ -87,6 +107,8 @@ def dashboard():
         warranty_alerts=warranty_alerts,
         overdue_checkouts=overdue_checkouts,
         upcoming_reservations=upcoming_reservations,
+        maintenance_due=maintenance_due,
+        pending_requests=pending_requests,
         recent_activity=recent_activity,
     )
 
@@ -187,7 +209,14 @@ def detail(asset_id):
         flash("You do not have permission to view that asset.", "danger")
         return redirect(url_for("assets.dashboard"))
     ensure_barcode(asset)
-    return render_template("asset_detail.html", asset=asset, users=active_users())
+    from asset_manager.database.models import MaintenanceSchedule
+
+    return render_template(
+        "asset_detail.html",
+        asset=asset,
+        users=active_users(),
+        maintenance_schedule=MaintenanceSchedule.query.filter_by(asset_id=asset.id).first(),
+    )
 
 
 @bp.route("/assets/<asset_id>/edit", methods=("GET", "POST"))

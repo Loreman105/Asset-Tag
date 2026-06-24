@@ -37,6 +37,7 @@
                             <dt class="col-sm-4">Location</dt><dd class="col-sm-8">{{ asset.current_location or '' }}</dd>
                             <dt class="col-sm-4">Serial</dt><dd class="col-sm-8">{{ asset.serial_number or '' }}</dd>
                             <dt class="col-sm-4">Warranty</dt><dd class="col-sm-8">{{ asset.warranty_provider or '' }} {{ asset.warranty_expiration_date or '' }}</dd>
+                            <dt class="col-sm-4">Maintenance Due</dt><dd class="col-sm-8">{{ maintenance_schedule.next_due_date if maintenance_schedule else 'Not scheduled' }}</dd>
                         </dl>
                     </div>
                 </div>
