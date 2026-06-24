@@ -1,5 +1,39 @@
 body {
+    cursor: default;
     min-height: 100vh;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+button,
+a,
+.nav-link,
+.dropdown-item,
+.btn,
+.form-check-label,
+label[for],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+select {
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+input[type="text"],
+input[type="search"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="tel"],
+textarea,
+[contenteditable="true"] {
+    cursor: text;
+    -webkit-user-select: text;
+    user-select: text;
 }
 
 .page-shell {
