@@ -23,11 +23,11 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="mode" value="checkout">
             <div class="row g-3 align-items-end">
-                <div class="col-lg-5">
+                <div class="col-lg-4">
                     <label class="form-label" for="checkout_asset_code">Asset Number or Barcode</label>
                     <input class="form-control form-control-lg" id="checkout_asset_code" name="asset_code" value="{{ asset_code if mode != 'checkin' else '' }}" autocomplete="off" autofocus required>
                 </div>
-                <div class="col-lg-5">
+                <div class="col-lg-4">
                     <label class="form-label" for="user_receiving_id">Check Out To</label>
                     <select class="form-select form-select-lg" id="user_receiving_id" name="user_receiving_id" required>
                         <option value="">Select a user</option>
@@ -35,6 +35,10 @@
                         <option value="{{ user.id }}">{{ user.full_name }}</option>
                         {% endfor %}
                     </select>
+                </div>
+                <div class="col-lg-2">
+                    <label class="form-label" for="expected_return_date">Due Back</label>
+                    <input class="form-control form-control-lg" id="expected_return_date" type="date" name="expected_return_date">
                 </div>
                 <div class="col-lg-2 d-grid">
                     <button class="btn btn-primary btn-lg" type="submit">Check Out</button>

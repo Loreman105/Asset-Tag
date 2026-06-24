@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Inventory Audit - Church Asset Manager{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+    <div>
+        <h1 class="h2">Inventory Audit Mode</h1>
+        <p class="text-body-secondary mb-0">Start an audit, walk the building with a phone, and scan assets as verified.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <section class="col-lg-5">
+        <form class="card card-body" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <h2 class="h5">Start Audit</h2>
+            <div class="mb-3">
+                <label class="form-label" for="name">Audit Name</label>
+                <input class="form-control" id="name" name="name" value="Inventory Audit" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="department">Department</label>
+                <select class="form-select" id="department" name="department">
+                    <option value="">All departments</option>
+                    {% for department in departments %}
+                    <option value="{{ department.name }}">{{ department.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="notes">Notes</label>
+                <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+            </div>
+            <button class="btn btn-primary" type="submit">Start Audit</button>
+        </form>
+    </section>
+    <section class="col-lg-7">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h5">Audit Sessions</h2>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead><tr><th>Name</th><th>Department</th><th>Status</th><th>Started</th><th>Scanned</th></tr></thead>
+                        <tbody>
+                        {% for session in sessions %}
+                        <tr>
+                            <td><a href="{{ url_for('reservations.audit_session', session_id=session.id) }}">{{ session.name }}</a></td>
+                            <td>{{ session.department or 'All' }}</td>
+                            <td>{{ session.status }}</td>
+                            <td>{{ session.started_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>{{ session.items|length }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5">No audit sessions yet.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

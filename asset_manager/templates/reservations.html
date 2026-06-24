@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Reservations - Church Asset Manager{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+    <div>
+        <h1 class="h2">Reservations</h1>
+        <p class="text-body-secondary mb-0">Hold projectors, microphones, cameras, laptops, and other assets before events.</p>
+    </div>
+    <a class="btn btn-outline-primary" href="{{ url_for('reservations.overdue') }}">Overdue Alerts</a>
+</div>
+
+<div class="row g-4">
+    <section class="col-lg-5">
+        <form class="card card-body" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <h2 class="h5">New Reservation</h2>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label" for="asset_id">Asset</label>
+                    <select class="form-select" id="asset_id" name="asset_id" required>
+                        <option value="">Select asset</option>
+                        {% for asset in assets %}
+                        <option value="{{ asset.id }}">{{ asset.asset_id }} - {{ asset.description }} - {{ asset.status }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label" for="event_name">Event</label>
+                    <input class="form-control" id="event_name" name="event_name" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="starts_at">Starts</label>
+                    <input class="form-control" id="starts_at" type="datetime-local" name="starts_at" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="ends_at">Ends</label>
+                    <input class="form-control" id="ends_at" type="datetime-local" name="ends_at" required>
+                </div>
+                <div class="col-12">
+                    <label class="form-label" for="reserved_for_id">Reserved For</label>
+                    <select class="form-select" id="reserved_for_id" name="reserved_for_id" required>
+                        <option value="">Select user</option>
+                        {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label" for="notes">Notes</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                </div>
+            </div>
+            <button class="btn btn-primary mt-3" type="submit">Reserve Asset</button>
+        </form>
+    </section>
+
+    <section class="col-lg-7">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h5">Upcoming Reservations</h2>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead><tr><th>Asset</th><th>Event</th><th>Window</th><th>For</th><th></th></tr></thead>
+                        <tbody>
+                        {% for reservation in upcoming %}
+                        <tr>
+                            <td><a href="{{ url_for('assets.detail', asset_id=reservation.asset.asset_id) }}">{{ reservation.asset.asset_id }}</a><span class="d-block small text-body-secondary">{{ reservation.asset.description }}</span></td>
+                            <td>{{ reservation.event_name }}</td>
+                            <td>{{ reservation.starts_at.strftime('%Y-%m-%d %H:%M') }}<span class="d-block small text-body-secondary">to {{ reservation.ends_at.strftime('%Y-%m-%d %H:%M') }}</span></td>
+                            <td>{{ reservation.reserved_for.full_name }}</td>
+                            <td class="text-end">
+                                <form class="d-inline" method="post" action="{{ url_for('reservations.checkout_reserved', reservation_id=reservation.id) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button class="btn btn-outline-primary btn-sm" type="submit">Check Out</button>
+                                </form>
+                                <form class="d-inline" method="post" action="{{ url_for('reservations.cancel', reservation_id=reservation.id) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button class="btn btn-outline-secondary btn-sm" type="submit">Cancel</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5">No upcoming reservations.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

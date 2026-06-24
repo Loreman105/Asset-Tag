@@ -20,6 +20,8 @@
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('assets.list_assets') }}">Assets</a></li>
                     {% if current_user.is_authenticated and current_user.can_manage_assets() %}
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('checkouts.quick') }}">Check In/Out</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('reservations.index') }}">Reservations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('reservations.audits') }}">Audit Mode</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('assets.create_asset') }}">Add Asset</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('reports.index') }}">Reports</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('users.list_users') }}">Users</a></li>
@@ -31,7 +33,7 @@
                 <div class="d-flex align-items-center gap-2">
                     <button class="btn btn-outline-secondary btn-sm" type="button" id="themeToggle">Dark Mode</button>
                     {% if current_user.is_authenticated %}
-                    <span class="small text-body-secondary">{{ current_user.full_name }} · {{ current_user.role|title }}</span>
+                    <span class="small text-body-secondary">{{ current_user.full_name }} - {{ current_user.role|title }}</span>
                     <a class="btn btn-outline-primary btn-sm" href="{{ url_for('auth.logout') }}">Logout</a>
                     {% endif %}
                 </div>

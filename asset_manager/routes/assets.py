@@ -57,7 +57,27 @@ def dashboard():
         .limit(10)
         .all()
     )
-    from asset_manager.database.models import AuditLog
+    from asset_manager.database.models import AuditLog, Checkout, Reservation, ReservationStatus
+
+    overdue_checkouts = (
+        Checkout.query.filter(
+            Checkout.returned_at.is_(None),
+            Checkout.expected_return_date.isnot(None),
+            Checkout.expected_return_date < date.today(),
+        )
+        .order_by(Checkout.expected_return_date)
+        .limit(10)
+        .all()
+    )
+    upcoming_reservations = (
+        Reservation.query.filter(
+            Reservation.status == ReservationStatus.ACTIVE,
+            Reservation.ends_at >= datetime.combine(date.today(), datetime.min.time()),
+        )
+        .order_by(Reservation.starts_at)
+        .limit(10)
+        .all()
+    )
 
     recent_activity = AuditLog.query.order_by(AuditLog.created_at.desc()).limit(20).all()
     return render_template(
@@ -65,6 +85,8 @@ def dashboard():
         total_assets=total_assets,
         status_counts=status_counts,
         warranty_alerts=warranty_alerts,
+        overdue_checkouts=overdue_checkouts,
+        upcoming_reservations=upcoming_reservations,
         recent_activity=recent_activity,
     )
 

@@ -56,7 +56,7 @@
                             <td>{{ item.checked_out_at.strftime('%Y-%m-%d') }}</td>
                             <td>{{ item.expected_return_date or '' }}</td>
                             <td>{{ item.returned_at.strftime('%Y-%m-%d') if item.returned_at else '' }}</td>
-                            <td>{{ item.checkout_condition }}{% if item.return_condition %} → {{ item.return_condition }}{% endif %}</td>
+                            <td>{{ item.checkout_condition }}{% if item.return_condition %} -> {{ item.return_condition }}{% endif %}</td>
                         </tr>
                         {% else %}
                         <tr><td colspan="5">No checkout history.</td></tr>

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}{{ session.name }} - Church Asset Manager{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+    <div>
+        <h1 class="h2">{{ session.name }}</h1>
+        <p class="text-body-secondary mb-0">{{ session.department or 'All departments' }} - {{ session.status }}</p>
+    </div>
+    {% if session.status == 'Open' %}
+    <form method="post" action="{{ url_for('reservations.close_audit', session_id=session.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-outline-primary" type="submit">Close Audit</button>
+    </form>
+    {% endif %}
+</div>
+
+<div class="row g-4">
+    <section class="col-lg-5">
+        <form class="card card-body audit-scan-form" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <h2 class="h5">Scan Asset</h2>
+            <div class="mb-3">
+                <label class="form-label" for="asset_code">Asset Number or Barcode</label>
+                <input class="form-control form-control-lg" id="asset_code" name="asset_code" autocomplete="off" inputmode="text" autofocus required>
+                <button class="btn btn-outline-secondary mt-2" id="startBarcodeScan" type="button">Use Camera</button>
+                <video class="barcode-video mt-2 d-none" id="barcodeVideo" playsinline muted></video>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="condition">Condition</label>
+                    <select class="form-select" id="condition" name="condition">
+                        <option value="">Use asset record</option>
+                        {% for condition in ['Excellent','Good','Fair','Poor','Damaged'] %}
+                        <option value="{{ condition }}">{{ condition }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="status">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="">Use asset record</option>
+                        {% for status in ['Available','Reserved','Checked Out','In Maintenance','Lost','Damaged'] %}
+                        <option value="{{ status }}">{{ status }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label" for="location">Location</label>
+                    <input class="form-control" id="location" name="location">
+                </div>
+                <div class="col-12">
+                    <label class="form-label" for="notes">Notes</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+                </div>
+            </div>
+            <button class="btn btn-primary btn-lg mt-3" type="submit">Verify Asset</button>
+        </form>
+    </section>
+
+    <section class="col-lg-7">
+        <div class="row g-3 mb-3">
+            <div class="col-6"><div class="metric"><span>Expected</span><strong>{{ expected_assets|length }}</strong></div></div>
+            <div class="col-6"><div class="metric"><span>Scanned</span><strong>{{ session.items|length }}</strong></div></div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="h5">Recently Scanned</h2>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead><tr><th>Asset</th><th>Condition</th><th>Location</th><th>Time</th></tr></thead>
+                        <tbody>
+                        {% for item in session.items|sort(attribute='scanned_at', reverse=true) %}
+                        <tr>
+                            <td><a href="{{ url_for('assets.detail', asset_id=item.asset.asset_id) }}">{{ item.asset.asset_id }}</a><span class="d-block small text-body-secondary">{{ item.asset.description }}</span></td>
+                            <td>{{ item.condition or '' }}</td>
+                            <td>{{ item.location or '' }}</td>
+                            <td>{{ item.scanned_at.strftime('%H:%M') }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4">No assets scanned yet.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h5">Not Yet Seen</h2>
+                <div class="table-responsive missing-audit-assets">
+                    <table class="table table-sm align-middle">
+                        <thead><tr><th>Asset</th><th>Description</th><th>Status</th><th>Location</th></tr></thead>
+                        <tbody>
+                        {% for asset in missing_assets %}
+                        <tr>
+                            <td><a href="{{ url_for('assets.detail', asset_id=asset.asset_id) }}">{{ asset.asset_id }}</a></td>
+                            <td>{{ asset.description }}</td>
+                            <td>{{ asset.status }}</td>
+                            <td>{{ asset.current_location or '' }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4">Every expected asset has been scanned.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

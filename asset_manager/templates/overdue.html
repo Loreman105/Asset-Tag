@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Overdue Alerts - Church Asset Manager{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+    <div>
+        <h1 class="h2">Overdue Alerts</h1>
+        <p class="text-body-secondary mb-0">Send reminders when checked-out equipment has not been returned.</p>
+    </div>
+    <form method="post" action="{{ url_for('reservations.send_reminders') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-primary" type="submit">Send Reminders</button>
+    </form>
+</div>
+
+<div class="row g-4">
+    <section class="col-lg-7">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h5">Currently Overdue</h2>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead><tr><th>Asset</th><th>Checked Out To</th><th>Due</th><th>Email</th></tr></thead>
+                        <tbody>
+                        {% for checkout in overdue_checkouts %}
+                        <tr>
+                            <td><a href="{{ url_for('assets.detail', asset_id=checkout.asset.asset_id) }}">{{ checkout.asset.asset_id }}</a><span class="d-block small text-body-secondary">{{ checkout.asset.description }}</span></td>
+                            <td>{{ checkout.user_receiving.full_name }}</td>
+                            <td>{{ checkout.expected_return_date }}</td>
+                            <td>{{ checkout.user_receiving.email }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4">No overdue checkouts.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="col-lg-5">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h5">Reminder History</h2>
+                <div class="list-group list-group-flush">
+                    {% for reminder in recent_reminders %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between gap-2">
+                            <strong>{{ reminder.delivery_status }}</strong>
+                            <span class="small text-body-secondary">{{ reminder.sent_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                        </div>
+                        <div>{{ reminder.sent_to }}</div>
+                        <div class="small text-body-secondary">{{ reminder.subject }}</div>
+                        {% if reminder.error_message %}<div class="small text-warning">{{ reminder.error_message }}</div>{% endif %}
+                    </div>
+                    {% else %}
+                    <p class="text-body-secondary mb-0">No reminders sent yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -20,6 +20,7 @@ class Role:
 class AssetStatus:
     AVAILABLE = "Available"
     CHECKED_OUT = "Checked Out"
+    RESERVED = "Reserved"
     IN_MAINTENANCE = "In Maintenance"
     RETIRED = "Retired"
     LOST = "Lost"
@@ -40,6 +41,17 @@ class MaintenanceType:
     UPGRADE = "Upgrade"
     CLEANING = "Cleaning"
     WARRANTY_SERVICE = "Warranty Service"
+
+
+class ReservationStatus:
+    ACTIVE = "Active"
+    FULFILLED = "Fulfilled"
+    CANCELLED = "Cancelled"
+
+
+class AuditSessionStatus:
+    OPEN = "Open"
+    CLOSED = "Closed"
 
 
 class User(UserMixin, db.Model):
@@ -165,6 +177,8 @@ class Asset(db.Model):
     photos = db.relationship("AssetPhoto", back_populates="asset", cascade="all, delete-orphan")
     documents = db.relationship("AssetDocument", back_populates="asset", cascade="all, delete-orphan")
     checkouts = db.relationship("Checkout", back_populates="asset", cascade="all, delete-orphan")
+    reservations = db.relationship("Reservation", back_populates="asset", cascade="all, delete-orphan")
+    audit_items = db.relationship("InventoryAuditItem", back_populates="asset", cascade="all, delete-orphan")
     maintenance_records = db.relationship("MaintenanceRecord", back_populates="asset", cascade="all, delete-orphan")
 
     @property
@@ -191,6 +205,70 @@ class Checkout(db.Model):
     user_receiving = db.relationship("User", foreign_keys=[user_receiving_id])
     checked_out_by = db.relationship("User", foreign_keys=[checked_out_by_id])
     returned_by = db.relationship("User", foreign_keys=[returned_by_id])
+
+
+class Reservation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    asset_id = db.Column(db.Integer, db.ForeignKey("asset.id"), nullable=False)
+    reserved_for_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    reserved_by_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    event_name = db.Column(db.String(160), nullable=False)
+    starts_at = db.Column(db.DateTime(timezone=True), nullable=False, index=True)
+    ends_at = db.Column(db.DateTime(timezone=True), nullable=False, index=True)
+    status = db.Column(db.String(40), nullable=False, default=ReservationStatus.ACTIVE)
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utc_now)
+    fulfilled_checkout_id = db.Column(db.Integer, db.ForeignKey("checkout.id"))
+
+    asset = db.relationship("Asset", back_populates="reservations")
+    reserved_for = db.relationship("User", foreign_keys=[reserved_for_id])
+    reserved_by = db.relationship("User", foreign_keys=[reserved_by_id])
+    fulfilled_checkout = db.relationship("Checkout")
+
+
+class OverdueReminder(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    checkout_id = db.Column(db.Integer, db.ForeignKey("checkout.id"), nullable=False)
+    sent_to = db.Column(db.String(255), nullable=False)
+    subject = db.Column(db.String(255), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    sent_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utc_now, index=True)
+    delivery_status = db.Column(db.String(40), nullable=False, default="Pending")
+    error_message = db.Column(db.Text)
+
+    checkout = db.relationship("Checkout")
+
+
+class InventoryAuditSession(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(160), nullable=False)
+    department = db.Column(db.String(120))
+    status = db.Column(db.String(40), nullable=False, default=AuditSessionStatus.OPEN)
+    started_by_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    started_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utc_now)
+    closed_at = db.Column(db.DateTime(timezone=True))
+    notes = db.Column(db.Text)
+
+    started_by = db.relationship("User")
+    items = db.relationship("InventoryAuditItem", back_populates="session", cascade="all, delete-orphan")
+
+
+class InventoryAuditItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.Integer, db.ForeignKey("inventory_audit_session.id"), nullable=False)
+    asset_id = db.Column(db.Integer, db.ForeignKey("asset.id"), nullable=False)
+    scanned_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utc_now, index=True)
+    scanned_by_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    condition = db.Column(db.String(60))
+    location = db.Column(db.String(160))
+    status = db.Column(db.String(60))
+    notes = db.Column(db.Text)
+
+    session = db.relationship("InventoryAuditSession", back_populates="items")
+    asset = db.relationship("Asset", back_populates="audit_items")
+    scanned_by = db.relationship("User")
+
+    __table_args__ = (db.UniqueConstraint("session_id", "asset_id", name="uq_audit_session_asset"),)
 
 
 class MaintenanceRecord(db.Model):

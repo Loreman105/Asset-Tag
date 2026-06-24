@@ -68,6 +68,7 @@ def quick():
             asset=asset,
             user_receiving_id=user.id,
             checked_out_by_id=current_user.id,
+            expected_return_date=parse_date(request.form.get("expected_return_date")),
             checkout_condition=asset.condition,
             checkout_notes="Quick checkout",
         )

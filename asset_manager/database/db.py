@@ -38,6 +38,7 @@ DEFAULT_CATEGORIES = [
 DEFAULT_STATUSES = [
     AssetStatus.AVAILABLE,
     AssetStatus.CHECKED_OUT,
+    AssetStatus.RESERVED,
     AssetStatus.IN_MAINTENANCE,
     AssetStatus.RETIRED,
     AssetStatus.LOST,
