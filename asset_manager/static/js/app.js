@@ -13,21 +13,6 @@ if (themeToggle) {
     });
 }
 
-document.querySelectorAll("[data-color-text]").forEach((textInput) => {
-    const colorInput = document.getElementById(textInput.dataset.colorText);
-    if (!colorInput) {
-        return;
-    }
-    colorInput.addEventListener("input", () => {
-        textInput.value = colorInput.value;
-    });
-    textInput.addEventListener("input", () => {
-        if (/^#[0-9a-fA-F]{6}$/.test(textInput.value)) {
-            colorInput.value = textInput.value;
-        }
-    });
-});
-
 const scanButton = document.getElementById("startBarcodeScan");
 const barcodeVideo = document.getElementById("barcodeVideo");
 const assetCodeInput = document.getElementById("asset_code");

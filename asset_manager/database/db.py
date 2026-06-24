@@ -45,15 +45,6 @@ DEFAULT_STATUSES = [
     AssetStatus.DAMAGED,
 ]
 
-DEFAULT_COLOR_SETTINGS = {
-    "color_primary": "#0d6efd",
-    "color_accent": "#0a58ca",
-    "color_page_background": "#f8f9fa",
-    "color_nav_background": "#ffffff",
-    "color_card_background": "#ffffff",
-    "color_body_text": "#212529",
-}
-
 
 def seed_database():
     for code, name in DEFAULT_PREFIXES:
@@ -70,10 +61,6 @@ def seed_database():
 
     if not Setting.query.filter_by(key="church_name").first():
         db.session.add(Setting(key="church_name", value="Church Asset Management"))
-
-    for key, value in DEFAULT_COLOR_SETTINGS.items():
-        if not Setting.query.filter_by(key=key).first():
-            db.session.add(Setting(key=key, value=value))
 
     if not User.query.first():
         db.session.add(

@@ -13,25 +13,6 @@
                 <div class="col-auto"><button class="btn btn-primary">Save</button></div>
             </form>
         </div>
-        <div class="card card-body mb-4">
-            <h2 class="h5">Colors</h2>
-            <form method="post" class="row g-3">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="action" value="colors">
-                {% for key, label in color_labels.items() %}
-                <div class="col-sm-6">
-                    <label class="form-label" for="{{ key }}">{{ label }}</label>
-                    <div class="input-group">
-                        <input class="form-control form-control-color" id="{{ key }}" type="color" name="{{ key }}" value="{{ color_settings[key] }}">
-                        <input class="form-control" value="{{ color_settings[key] }}" data-color-text="{{ key }}" aria-label="{{ label }} hex value">
-                    </div>
-                </div>
-                {% endfor %}
-                <div class="col-12">
-                    <button class="btn btn-primary" type="submit">Save Colors</button>
-                </div>
-            </form>
-        </div>
         <div class="card card-body">
             <h2 class="h5">Department Prefixes</h2>
             <form method="post" class="row g-2 mb-3">
