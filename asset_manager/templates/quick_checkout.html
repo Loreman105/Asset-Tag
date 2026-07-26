@@ -26,6 +26,12 @@
                 <div class="col-lg-4">
                     <label class="form-label" for="checkout_asset_code">Asset Number or Barcode</label>
                     <input class="form-control form-control-lg" id="checkout_asset_code" name="asset_code" value="{{ asset_code if mode != 'checkin' else '' }}" autocomplete="off" autofocus required>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <button class="btn btn-outline-primary btn-sm" type="button" id="startCheckoutBarcodeScan">Use Camera</button>
+                        <button class="btn btn-outline-secondary btn-sm d-none" type="button" id="stopCheckoutBarcodeScan">Stop</button>
+                    </div>
+                    <video id="checkoutBarcodeVideo" class="barcode-video d-none mt-2" playsinline muted></video>
+                    <div id="checkoutScannerStatus" class="small text-body-secondary mt-2">Type the barcode digits manually or use the camera.</div>
                 </div>
                 <div class="col-lg-4">
                     <label class="form-label" for="user_receiving_id">Check Out To</label>
@@ -55,6 +61,12 @@
                 <div class="col-lg-10">
                     <label class="form-label" for="checkin_asset_code">Asset Number or Barcode</label>
                     <input class="form-control form-control-lg" id="checkin_asset_code" name="asset_code" value="{{ asset_code if mode == 'checkin' else '' }}" autocomplete="off" required>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <button class="btn btn-outline-primary btn-sm" type="button" id="startCheckinBarcodeScan">Use Camera</button>
+                        <button class="btn btn-outline-secondary btn-sm d-none" type="button" id="stopCheckinBarcodeScan">Stop</button>
+                    </div>
+                    <video id="checkinBarcodeVideo" class="barcode-video d-none mt-2" playsinline muted></video>
+                    <div id="checkinScannerStatus" class="small text-body-secondary mt-2">Type the barcode digits manually or use the camera.</div>
                 </div>
                 <div class="col-lg-2 d-grid">
                     <button class="btn btn-primary btn-lg" type="submit">Check In</button>

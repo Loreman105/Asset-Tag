@@ -15,7 +15,18 @@
             <div class="col-md-3">{{ form.password.label(class="form-label") }}{{ form.password(class="form-control") }}</div>
             <div class="col-md-3">{{ form.confirm_password.label(class="form-label") }}{{ form.confirm_password(class="form-control") }}</div>
             {% if current_user.role == 'administrator' %}
-            <div class="col-md-3"><label class="form-label">Role</label><select class="form-select" name="role"><option value="viewer">Viewer</option><option value="moderator">Moderator</option><option value="administrator">Administrator</option></select></div>
+            <div class="col-md-6">
+                <label class="form-label">Role</label>
+                <input type="hidden" name="role" id="create-user-role" value="viewer">
+                <div class="role-help mt-2">
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-sm role-help-pill" data-role="viewer" data-title="Viewer" data-description="Viewer can access the main asset views and basic records without broader management rights.">Viewer</button>
+                        <button type="button" class="btn btn-sm role-help-pill" data-role="moderator" data-title="Moderator" data-description="Moderator adds asset management, maintenance, reservations, reports, and user administration beyond Viewer.">Moderator</button>
+                        <button type="button" class="btn btn-sm role-help-pill" data-role="administrator" data-title="Administrator" data-description="Administrator adds full system settings access and complete administrative control beyond Moderator.">Administrator</button>
+                    </div>
+                    <div id="role-help-text" class="form-text mt-2">Click a role to select it and see what it adds.</div>
+                </div>
+            </div>
             {% endif %}
             <div class="col-md-3 d-flex align-items-end">{{ form.submit(class="btn btn-primary") }}</div>
         </div>
@@ -62,4 +73,40 @@
         </table>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const roleInput = document.getElementById('create-user-role');
+        const rolePills = document.querySelectorAll('.role-help-pill');
+        const roleHelpText = document.getElementById('role-help-text');
+
+        if (!roleInput || !rolePills.length || !roleHelpText) {
+            return;
+        }
+
+        const setRoleHelp = function (role) {
+            const activePill = document.querySelector(`.role-help-pill[data-role="${role}"]`);
+            const selectedDescription = activePill ? activePill.dataset.description : 'Choose a role to see its added access.';
+            roleInput.value = role;
+            rolePills.forEach((pill) => pill.classList.toggle('active', pill.dataset.role === role));
+            roleHelpText.innerHTML = `<strong>${activePill ? activePill.dataset.title : 'Role'}</strong>: ${selectedDescription}`;
+        };
+
+        rolePills.forEach((pill) => {
+            pill.addEventListener('mouseenter', function () {
+                setRoleHelp(pill.dataset.role);
+            });
+            pill.addEventListener('focus', function () {
+                setRoleHelp(pill.dataset.role);
+            });
+            pill.addEventListener('click', function () {
+                setRoleHelp(pill.dataset.role);
+            });
+        });
+
+        setRoleHelp(roleInput.value || 'viewer');
+    });
+</script>
 {% endblock %}

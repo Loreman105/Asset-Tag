@@ -13,80 +13,125 @@ if (themeToggle) {
     });
 }
 
-const scanButton = document.getElementById("startBarcodeScan");
-const stopScanButton = document.getElementById("stopBarcodeScan");
-const barcodeVideo = document.getElementById("barcodeVideo");
-const assetCodeInput = document.getElementById("asset_code");
-const scannerStatus = document.getElementById("scannerStatus");
-let activeBarcodeStream = null;
+function initializeBarcodeScanner({ input, scanButton, stopScanButton, video, status, unsupportedMessage }) {
+    if (!input || !scanButton || !video) {
+        return;
+    }
 
-if (scanButton && barcodeVideo && assetCodeInput) {
-    if (!("BarcodeDetector" in window) || !navigator.mediaDevices?.getUserMedia) {
+    let activeBarcodeStream = null;
+    const defaultButtonText = scanButton.textContent;
+
+    const stopBarcodeScan = () => {
+        if (activeBarcodeStream) {
+            activeBarcodeStream.getTracks().forEach((track) => track.stop());
+            activeBarcodeStream = null;
+        }
+        video.classList.add("d-none");
+        video.srcObject = null;
+        stopScanButton?.classList.add("d-none");
+        scanButton.disabled = false;
+        scanButton.textContent = defaultButtonText;
+    };
+
+    const updateStatus = (message) => {
+        if (status) {
+            status.textContent = message;
+        }
+    };
+
+    if (!navigator.mediaDevices?.getUserMedia) {
         scanButton.disabled = true;
         scanButton.textContent = "Camera Scan Unavailable";
-        if (scannerStatus) {
-            scannerStatus.textContent = "This browser does not expose camera barcode scanning. Enter the tag manually.";
-        }
-    } else {
-        scanButton.addEventListener("click", async () => {
-            try {
+        updateStatus(unsupportedMessage || "This browser cannot access the camera. You can still enter the tag manually.");
+        return;
+    }
+
+    scanButton.addEventListener("click", async () => {
+        try {
+            activeBarcodeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            video.srcObject = activeBarcodeStream;
+            video.classList.remove("d-none");
+            stopScanButton?.classList.remove("d-none");
+            scanButton.disabled = true;
+            scanButton.textContent = "Camera On";
+
+            if ("BarcodeDetector" in window) {
                 const detector = new BarcodeDetector({ formats: ["code_128", "code_39", "qr_code"] });
-                activeBarcodeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                barcodeVideo.srcObject = activeBarcodeStream;
-                barcodeVideo.classList.remove("d-none");
-                stopScanButton?.classList.remove("d-none");
-                scanButton.disabled = true;
-                if (scannerStatus) {
-                    scannerStatus.textContent = "Point the camera at the asset label.";
-                }
-                await barcodeVideo.play();
+                updateStatus("Point the camera at the asset label.");
+                await video.play();
 
                 const scanFrame = async () => {
-                    const codes = await detector.detect(barcodeVideo);
+                    const codes = await detector.detect(video);
                     if (codes.length > 0) {
-                        assetCodeInput.value = codes[0].rawValue;
+                        input.value = codes[0].rawValue;
                         stopBarcodeScan();
-                        assetCodeInput.form.requestSubmit();
+                        input.form?.requestSubmit();
                         return;
                     }
-                    if (barcodeVideo.srcObject) {
+                    if (video.srcObject) {
                         requestAnimationFrame(scanFrame);
                     }
                 };
                 scanFrame();
-            } catch (error) {
-                stopBarcodeScan();
-                scanButton.textContent = "Camera Scan Failed";
-                scanButton.disabled = false;
-                if (scannerStatus) {
-                    scannerStatus.textContent = "Camera access failed. Check browser permissions or enter the tag manually.";
-                }
+            } else {
+                await video.play();
+                updateStatus("Camera is ready, but this browser does not support automatic barcode detection. Try a newer Chrome/Edge browser or use a hardware scanner.");
             }
-        });
-    }
+        } catch (error) {
+            stopBarcodeScan();
+            scanButton.textContent = "Camera Scan Failed";
+            scanButton.disabled = false;
+            if (error?.name === "NotAllowedError") {
+                updateStatus("Camera permission was denied. Allow camera access in the browser and try again.");
+            } else if (error?.name === "NotFoundError") {
+                updateStatus("No camera was found on this device. You can still enter the tag manually.");
+            } else if (error?.message?.includes("secure")) {
+                updateStatus("Camera access requires a secure connection (localhost or HTTPS). Please switch to a secure page and try again.");
+            } else {
+                updateStatus("Camera access failed. Check browser permissions or enter the tag manually.");
+            }
+        }
+    });
+
+    stopScanButton?.addEventListener("click", () => {
+        stopBarcodeScan();
+        updateStatus("Scanner stopped.");
+    });
+
+    input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && input.value.trim()) {
+            event.preventDefault();
+            input.form?.requestSubmit();
+        }
+    });
 }
 
-function stopBarcodeScan() {
-    if (activeBarcodeStream) {
-        activeBarcodeStream.getTracks().forEach((track) => track.stop());
-        activeBarcodeStream = null;
+[
+    {
+        input: document.getElementById("asset_code"),
+        scanButton: document.getElementById("startBarcodeScan"),
+        stopScanButton: document.getElementById("stopBarcodeScan"),
+        video: document.getElementById("barcodeVideo"),
+        status: document.getElementById("scannerStatus"),
+        unsupportedMessage: "This browser does not expose camera barcode scanning. Enter the tag manually."
+    },
+    {
+        input: document.getElementById("checkout_asset_code"),
+        scanButton: document.getElementById("startCheckoutBarcodeScan"),
+        stopScanButton: document.getElementById("stopCheckoutBarcodeScan"),
+        video: document.getElementById("checkoutBarcodeVideo"),
+        status: document.getElementById("checkoutScannerStatus"),
+        unsupportedMessage: "Camera barcode scanning is unavailable for checkout. You can still enter the asset number manually."
+    },
+    {
+        input: document.getElementById("checkin_asset_code"),
+        scanButton: document.getElementById("startCheckinBarcodeScan"),
+        stopScanButton: document.getElementById("stopCheckinBarcodeScan"),
+        video: document.getElementById("checkinBarcodeVideo"),
+        status: document.getElementById("checkinScannerStatus"),
+        unsupportedMessage: "Camera barcode scanning is unavailable for check-in. You can still enter the asset number manually."
     }
-    if (barcodeVideo) {
-        barcodeVideo.classList.add("d-none");
-        barcodeVideo.srcObject = null;
-    }
-    stopScanButton?.classList.add("d-none");
-    if (scanButton) {
-        scanButton.disabled = false;
-    }
-}
-
-stopScanButton?.addEventListener("click", () => {
-    stopBarcodeScan();
-    if (scannerStatus) {
-        scannerStatus.textContent = "Scanner stopped.";
-    }
-});
+].forEach((config) => initializeBarcodeScanner(config));
 
 const selectAllLabels = document.getElementById("selectAllLabels");
 if (selectAllLabels) {

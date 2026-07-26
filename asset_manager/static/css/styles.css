@@ -151,3 +151,21 @@ textarea,
         width: 2in;
     }
 }
+
+.role-help-pill {
+    border: 1px solid var(--bs-border-color);
+    color: var(--bs-body-color);
+    transition: all 0.2s ease-in-out;
+}
+
+.role-help-pill:hover,
+.role-help-pill:focus,
+.role-help-pill.active {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: white;
+}
+
+.role-help .form-text {
+    line-height: 1.4;
+}
