@@ -1,2 +1,28 @@
-asset_manager/instance/asset_manager.sqlite3
+# Python runtime artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment and environment files
+venv/
+.env
+.env.*
+.venv/
+env/
+ENV/
+
+# Pytest cache
+.pytest_cache/
+
+# Local database and runtime data
+asset_manager/instance/
+*.sqlite3
+
+# Uploaded assets and generated files
+asset_manager/static/uploads/
+asset_manager/static/barcodes/
+asset_manager/backups/
+
+# IDE/editor settings
+.vscode/
 

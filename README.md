@@ -34,7 +34,7 @@ Change the default password and `SECRET_KEY` before entering real records.
 
 ## Asset IDs
 
-Asset IDs use the requested `PPYYNNNNVV` format.
+Asset IDs use the  `PPYYNNNNVV` format.
 
 Example: `1024000100`
 
