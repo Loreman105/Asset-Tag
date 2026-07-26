@@ -14,15 +14,15 @@
             <div class="col-md-3">{{ form.phone.label(class="form-label") }}{{ form.phone(class="form-control") }}</div>
             <div class="col-md-3">{{ form.password.label(class="form-label") }}{{ form.password(class="form-control") }}</div>
             <div class="col-md-3">{{ form.confirm_password.label(class="form-label") }}{{ form.confirm_password(class="form-control") }}</div>
-            {% if current_user.role == 'administrator' %}
+            {% if current_user.can_manage_users() %}
             <div class="col-md-6">
                 <label class="form-label">Role</label>
                 <input type="hidden" name="role" id="create-user-role" value="viewer">
                 <div class="role-help mt-2">
                     <div class="d-flex flex-wrap gap-2">
-                        <button type="button" class="btn btn-sm role-help-pill" data-role="viewer" data-title="Viewer" data-description="Viewer can access the main asset views and basic records without broader management rights.">Viewer</button>
-                        <button type="button" class="btn btn-sm role-help-pill" data-role="moderator" data-title="Moderator" data-description="Moderator adds asset management, maintenance, reservations, reports, and user administration beyond Viewer.">Moderator</button>
-                        <button type="button" class="btn btn-sm role-help-pill" data-role="administrator" data-title="Administrator" data-description="Administrator adds full system settings access and complete administrative control beyond Moderator.">Administrator</button>
+                        <button type="button" class="btn btn-sm role-help-pill" data-role="viewer" data-title="Viewer" data-description="Viewer can sign in, review their own assigned assets, and submit requests for equipment for events.">Viewer</button>
+                        <button type="button" class="btn btn-sm role-help-pill" data-role="moderator" data-title="Moderator" data-description="Moderator can fully manage device records, add or update asset states, check in/out equipment, handle maintenance and reservations, and keep devices current without access to reports, user administration, passwords, or settings.">Moderator</button>
+                        <button type="button" class="btn btn-sm role-help-pill" data-role="administrator" data-title="Administrator" data-description="Administrator has everything a moderator can do, plus access to reports, user creation and permission changes, password resets, and system settings.">Administrator</button>
                     </div>
                     <div id="role-help-text" class="form-text mt-2">Click a role to select it and see what it adds.</div>
                 </div>
@@ -46,7 +46,7 @@
                 <td>{{ user.role|title }}</td>
                 <td>{{ user.last_login_at.strftime('%Y-%m-%d') if user.last_login_at else '' }}</td>
                 <td class="d-flex gap-2">
-                    {% if current_user.role == 'administrator' %}
+                    {% if current_user.can_manage_users() %}
                     <form method="post" action="{{ url_for('users.update_role', user_id=user.id) }}" class="d-flex gap-2">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <select class="form-select form-select-sm" name="role">{% for role in ['viewer','moderator','administrator'] %}<option value="{{ role }}" {% if user.role == role %}selected{% endif %}>{{ role|title }}</option>{% endfor %}</select>
@@ -59,7 +59,7 @@
                         </button>
                     </form>
                     {% endif %}
-                    {% if current_user.role in ['administrator', 'moderator'] %}
+                    {% if current_user.can_manage_users() %}
                     <form method="post" action="{{ url_for('users.reset_password', user_id=user.id) }}" class="d-flex gap-2">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input class="form-control form-control-sm" type="password" name="password" placeholder="New password">

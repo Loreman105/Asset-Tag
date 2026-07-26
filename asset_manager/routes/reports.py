@@ -12,7 +12,7 @@ bp = Blueprint("reports", __name__, url_prefix="/reports")
 
 @bp.route("/")
 @login_required
-@roles_required("administrator", "moderator")
+@roles_required(Role.ADMIN)
 def index():
     return render_template("reports.html")
 
@@ -27,7 +27,7 @@ def audit_log():
 
 @bp.route("/<report_name>")
 @login_required
-@roles_required("administrator", "moderator")
+@roles_required(Role.ADMIN)
 def export(report_name):
     rows, headers, title = build_report(report_name)
     file_type = request.args.get("format", "csv")

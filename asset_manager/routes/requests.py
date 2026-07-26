@@ -17,7 +17,7 @@ from asset_manager.database.models import (
     utc_now,
 )
 from asset_manager.extensions import db
-from asset_manager.routes.auth import asset_manager_required
+from asset_manager.routes.auth import asset_manager_required, roles_required
 from asset_manager.routes.reservations import reservation_conflicts
 
 bp = Blueprint("asset_requests", __name__, url_prefix="/requests")
@@ -39,6 +39,7 @@ def requestable_assets():
 
 @bp.route("/", methods=("GET", "POST"))
 @login_required
+@roles_required("administrator", "moderator", "viewer")
 def index():
     assets = requestable_assets()
     if request.method == "POST":

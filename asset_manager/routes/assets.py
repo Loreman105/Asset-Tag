@@ -15,6 +15,7 @@ from asset_manager.database.models import (
     AssetStatus,
     Category,
     DepartmentPrefix,
+    Role,
     StatusValue,
     User,
 )
@@ -123,8 +124,8 @@ def list_assets():
     category = request.args.get("category", "").strip()
     warranty = request.args.get("warranty", "").strip()
 
-    if current_user.role == "viewer":
-        query = query.filter((Asset.assigned_user_id == current_user.id) | (Asset.status != AssetStatus.RETIRED))
+    if current_user.role == Role.VIEWER:
+        query = query.filter(Asset.assigned_user_id == current_user.id)
     if search:
         wildcard = f"%{search}%"
         query = query.outerjoin(User, Asset.assigned_user_id == User.id).filter(
@@ -205,7 +206,7 @@ def create_asset():
 @login_required
 def detail(asset_id):
     asset = Asset.query.filter_by(asset_id=asset_id).first_or_404()
-    if current_user.role == "viewer" and asset.assigned_user_id not in (None, current_user.id):
+    if current_user.role == Role.VIEWER and asset.assigned_user_id != current_user.id:
         flash("You do not have permission to view that asset.", "danger")
         return redirect(url_for("assets.dashboard"))
     ensure_barcode(asset)

@@ -2,7 +2,7 @@
 {% block title %}Reports - Church Asset Manager{% endblock %}
 {% block content %}
 <h1 class="h2 mb-3">Reports</h1>
-{% if current_user.role == 'administrator' %}
+{% if current_user.can_view_reports() %}
 <div class="mb-3"><a class="btn btn-outline-secondary" href="{{ url_for('reports.audit_log') }}">View Audit Log</a></div>
 {% endif %}
 <div class="row g-3">

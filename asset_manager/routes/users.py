@@ -13,13 +13,13 @@ bp = Blueprint("users", __name__, url_prefix="/users")
 
 
 @bp.route("/")
-@roles_required(Role.ADMIN, Role.MODERATOR)
+@roles_required(Role.ADMIN)
 def list_users():
     return render_template("users.html", users=User.query.order_by(User.last_name, User.first_name).all(), form=UserForm())
 
 
 @bp.route("/create", methods=("POST",))
-@roles_required(Role.ADMIN, Role.MODERATOR)
+@roles_required(Role.ADMIN)
 def create():
     form = UserForm()
     if form.validate_on_submit():
@@ -78,7 +78,7 @@ def enable(user_id):
 
 
 @bp.route("/<int:user_id>/reset-password", methods=("POST",))
-@roles_required(Role.ADMIN, Role.MODERATOR)
+@roles_required(Role.ADMIN)
 def reset_password(user_id):
     user = User.query.get_or_404(user_id)
     password = request.form["password"]

@@ -42,8 +42,12 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Admin</a>
                         <ul class="dropdown-menu">
+                            {% if current_user.is_authenticated and current_user.can_view_reports() %}
                             <li><a class="dropdown-item" href="{{ url_for('reports.index') }}">Reports</a></li>
+                            {% endif %}
+                            {% if current_user.is_authenticated and current_user.can_manage_users() %}
                             <li><a class="dropdown-item" href="{{ url_for('users.list_users') }}">Users</a></li>
+                            {% endif %}
                             {% if current_user.is_authenticated and current_user.can_manage_settings() %}
                             <li><a class="dropdown-item" href="{{ url_for('settings.index') }}">Settings</a></li>
                             {% endif %}

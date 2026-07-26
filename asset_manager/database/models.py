@@ -104,6 +104,12 @@ class User(UserMixin, db.Model):
             if permission.can_modify_assets
         }
 
+    def can_manage_users(self):
+        return self.role == Role.ADMIN
+
+    def can_view_reports(self):
+        return self.role == Role.ADMIN
+
     def can_manage_settings(self):
         return self.role == Role.ADMIN
 
