@@ -8,6 +8,7 @@ if __package__ is None:
     sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from flask import Flask, redirect, url_for
+from flask.cli import with_appcontext
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from asset_manager.config import Config
@@ -53,6 +54,15 @@ def create_app(config_object=Config):
     app.register_blueprint(settings_bp)
     app.register_blueprint(users_bp)
     register_reservation_cli(app)
+
+    @app.cli.command("backup-if-due")
+    @with_appcontext
+    def backup_if_due():
+        """Create the scheduled backup when its configured interval is due."""
+        from asset_manager.backup import maybe_create_scheduled_backup
+
+        backup = maybe_create_scheduled_backup()
+        print(f"Created {backup.name}" if backup else "No backup is due.")
 
     @app.context_processor
     def organization_context():

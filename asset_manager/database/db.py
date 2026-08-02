@@ -67,6 +67,17 @@ def seed_database():
         db.session.add(Setting(key="organization_logo", value=""))
     if not Setting.query.filter_by(key="inventory_base_url").first():
         db.session.add(Setting(key="inventory_base_url", value="http://InventoryHub.local"))
+    for key, value in (("backup_frequency", "disabled"), ("backup_retention", "10"), ("backup_last_run", "")):
+        if not Setting.query.filter_by(key=key).first():
+            db.session.add(Setting(key=key, value=value))
+    for key, value in (
+        ("backup_destination", "local"), ("backup_network_path", ""),
+        ("backup_sftp_host", ""), ("backup_sftp_port", "22"), ("backup_sftp_username", ""), ("backup_sftp_path", ""),
+        ("backup_s3_endpoint", ""), ("backup_s3_region", "us-east-1"), ("backup_s3_bucket", ""), ("backup_s3_prefix", "inventory-hub"), ("backup_s3_access_key", ""),
+        ("backup_remote_status", "Not configured"),
+    ):
+        if not Setting.query.filter_by(key=key).first():
+            db.session.add(Setting(key=key, value=value))
 
     if not User.query.first():
         db.session.add(

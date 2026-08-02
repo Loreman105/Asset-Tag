@@ -46,6 +46,26 @@ encode the asset's Inventory Hub URL, so scanning one opens that asset record
 directly. Batch labels include both formats. Set the organization name, logo,
 timezone, and QR base URL in **Admin → Settings**.
 
+## Full system backups
+
+Administrators can download or restore a complete ZIP backup in **Admin →
+Settings → Backups**. It includes all database records, documents, photos,
+branding, QR codes, and barcodes. Restoring replaces the current inventory and
+managed files, so download a fresh backup first.
+
+Set the automatic backup frequency and retention count in the same screen.
+Automatic backups can also be copied to a network share/NAS, an SFTP server,
+or Amazon S3 and S3-compatible storage such as Backblaze B2, Wasabi,
+Cloudflare R2, MinIO, or DigitalOcean Spaces. Configure the selected destination
+and its credentials in **Admin → Settings → Backups**; the credentials are
+encrypted using `SECRET_KEY`, so keep that key stable for future uploads.
+Schedule the following command with Windows Task Scheduler (for example, every
+night) to produce a backup when the configured interval is due:
+
+```powershell
+flask --app asset_manager.app backup-if-due
+```
+
 Default administrator:
 
 ```text

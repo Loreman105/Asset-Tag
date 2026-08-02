@@ -39,6 +39,40 @@
             <form method="post" class="row g-2 mb-3"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="status"><div class="col"><input class="form-control" name="name"></div><div class="col-auto"><button class="btn btn-primary">Add</button></div></form>
             <ul>{% for item in statuses %}<li>{{ item.name }}</li>{% endfor %}</ul>
         </div>
+        <div class="card card-body mt-4">
+            <h2 class="h5">Backups</h2>
+            <p class="text-body-secondary small">A full backup contains all records, users, settings, documents, photos, and label images.</p>
+            <div class="d-flex flex-wrap gap-2 mb-3"><a class="btn btn-primary" href="{{ url_for('settings.export_backup') }}">Download full backup</a></div>
+            <form method="post" class="row g-2 border-top pt-3">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="backup_schedule">
+                <div class="col-md-7"><label class="form-label">Automatic backup frequency</label><select class="form-select" name="backup_frequency"><option value="disabled" {% if backup_frequency == 'disabled' %}selected{% endif %}>Disabled</option><option value="daily" {% if backup_frequency == 'daily' %}selected{% endif %}>Daily</option><option value="weekly" {% if backup_frequency == 'weekly' %}selected{% endif %}>Weekly</option></select></div>
+                <div class="col-md-5"><label class="form-label">Keep local backups</label><input class="form-control" name="backup_retention" type="number" min="1" max="100" value="{{ backup_retention }}"></div>
+                <div class="col-12"><button class="btn btn-outline-primary">Save backup schedule</button><div class="form-text">Automatic archives are stored in the server’s <code>asset_manager/backups</code> folder. Last run: {{ backup_last_run or 'Never' }}.</div></div>
+            </form>
+            <form method="post" class="row g-3 border-top pt-3 mt-3">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="backup_destination">
+                <div class="col-12"><label class="form-label">Off-server destination</label><select class="form-select" name="backup_destination"><option value="local" {% if backup_destination == 'local' %}selected{% endif %}>Local server only</option><option value="network_share" {% if backup_destination == 'network_share' %}selected{% endif %}>Network share / NAS (SMB)</option><option value="sftp" {% if backup_destination == 'sftp' %}selected{% endif %}>SFTP server</option><option value="s3" {% if backup_destination == 's3' %}selected{% endif %}>S3-compatible cloud storage</option></select><div class="form-text">Only the selected destination is used. Credentials are encrypted with this Inventory Hub installation’s secret key.</div></div>
+                <div class="col-12" data-backup-destination="network_share"><label class="form-label">Network share / NAS folder</label><input class="form-control" name="backup_network_path" value="{{ backup_network_path }}" placeholder="\\NAS\InventoryHubBackups"><div class="form-text">The account running Inventory Hub must have write access to this UNC path.</div></div>
+                <div class="col-md-6" data-backup-destination="sftp"><label class="form-label">SFTP host</label><input class="form-control" name="backup_sftp_host" value="{{ backup_sftp_host }}" placeholder="backup.example.com"></div>
+                <div class="col-md-2" data-backup-destination="sftp"><label class="form-label">Port</label><input class="form-control" name="backup_sftp_port" value="{{ backup_sftp_port }}"></div>
+                <div class="col-md-4" data-backup-destination="sftp"><label class="form-label">Username</label><input class="form-control" name="backup_sftp_username" value="{{ backup_sftp_username }}"></div>
+                <div class="col-md-6" data-backup-destination="sftp"><label class="form-label">SFTP password</label><input class="form-control" type="password" name="backup_sftp_password" placeholder="Leave blank to keep existing password"></div>
+                <div class="col-md-6" data-backup-destination="sftp"><label class="form-label">Remote folder</label><input class="form-control" name="backup_sftp_path" value="{{ backup_sftp_path }}" placeholder="/backups/inventory-hub"></div>
+                <div class="col-md-6" data-backup-destination="s3"><label class="form-label">S3 bucket</label><input class="form-control" name="backup_s3_bucket" value="{{ backup_s3_bucket }}" placeholder="organization-backups"></div>
+                <div class="col-md-6" data-backup-destination="s3"><label class="form-label">S3 folder prefix</label><input class="form-control" name="backup_s3_prefix" value="{{ backup_s3_prefix }}" placeholder="inventory-hub"></div>
+                <div class="col-md-6" data-backup-destination="s3"><label class="form-label">S3 access key</label><input class="form-control" name="backup_s3_access_key" value="{{ backup_s3_access_key }}"></div>
+                <div class="col-md-6" data-backup-destination="s3"><label class="form-label">S3 secret key</label><input class="form-control" type="password" name="backup_s3_secret_key" placeholder="Leave blank to keep existing secret"></div>
+                <div class="col-md-7" data-backup-destination="s3"><label class="form-label">S3 endpoint URL</label><input class="form-control" name="backup_s3_endpoint" value="{{ backup_s3_endpoint }}" placeholder="Leave blank for Amazon S3; e.g. https://s3.us-west-000.backblazeb2.com"></div>
+                <div class="col-md-5" data-backup-destination="s3"><label class="form-label">S3 region</label><input class="form-control" name="backup_s3_region" value="{{ backup_s3_region }}" placeholder="us-east-1"></div>
+                <div class="col-12"><button class="btn btn-outline-primary">Save off-server destination</button><div class="form-text">Last remote upload: {{ backup_remote_status }}.</div></div>
+            </form>
+            <form method="post" action="{{ url_for('settings.import_backup') }}" enctype="multipart/form-data" class="row g-2 border-top pt-3 mt-3">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="col-12"><label class="form-label">Restore a full backup</label><input class="form-control" type="file" name="backup_file" accept=".zip,application/zip" required></div>
+                <div class="col-md-7"><input class="form-control" name="confirmation" placeholder="Type RESTORE to confirm" required></div>
+                <div class="col-md-5"><button class="btn btn-outline-danger w-100" type="submit">Restore and replace data</button></div>
+            </form>
+        </div>
     </section>
 </div>
 {% endblock %}
