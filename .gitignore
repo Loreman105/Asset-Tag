@@ -26,3 +26,4 @@ asset_manager/backups/
 # IDE/editor settings
 .vscode/
 
+asset_manager/instance/asset_manager.sqlite3
