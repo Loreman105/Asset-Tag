@@ -15,25 +15,9 @@ from asset_manager.database.models import (
 from asset_manager.extensions import bcrypt, db
 
 
-DEFAULT_PREFIXES = [
-    ("10", "AV"),
-    ("20", "Children's Ministry"),
-    ("30", "Worship"),
-    ("40", "Administration"),
-    ("50", "IT"),
-    ("60", "Facilities"),
-]
+DEFAULT_PREFIXES = []
 
-DEFAULT_CATEGORIES = [
-    "Computer",
-    "Camera",
-    "Audio",
-    "Lighting",
-    "Networking",
-    "Display",
-    "Printer",
-    "Accessory",
-]
+DEFAULT_CATEGORIES = []
 
 DEFAULT_STATUSES = [
     AssetStatus.AVAILABLE,
@@ -60,7 +44,7 @@ def seed_database():
             db.session.add(StatusValue(name=name))
 
     if not Setting.query.filter_by(key="church_name").first():
-        db.session.add(Setting(key="church_name", value="Church Asset Management"))
+        db.session.add(Setting(key="church_name", value="Asset Management"))
     if not Setting.query.filter_by(key="organization_timezone").first():
         db.session.add(Setting(key="organization_timezone", value="America/Chicago"))
     if not Setting.query.filter_by(key="organization_logo").first():

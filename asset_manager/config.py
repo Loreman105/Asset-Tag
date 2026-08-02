@@ -20,7 +20,7 @@ class Config:
     MAX_CONTENT_LENGTH = 256 * 1024 * 1024
     WTF_CSRF_ENABLED = True
 
-    CHURCH_NAME = os.environ.get("CHURCH_NAME", "Church Asset Management")
+    CHURCH_NAME = os.environ.get("CHURCH_NAME", "Asset Management")
     DEFAULT_TIMEZONE = os.environ.get("INVENTORY_TIMEZONE", "America/Chicago")
     INVENTORY_HOSTNAME = os.environ.get("INVENTORY_HOSTNAME", "InventoryHub.local")
     INVENTORY_PORT = int(os.environ.get("INVENTORY_PORT", "80"))
