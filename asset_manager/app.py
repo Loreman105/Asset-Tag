@@ -9,6 +9,7 @@ if __package__ is None:
 
 from flask import Flask, redirect, url_for
 from flask.cli import with_appcontext
+from flask_login import current_user
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from asset_manager.config import Config
@@ -85,6 +86,8 @@ def create_app(config_object=Config):
 
     @app.route("/")
     def index():
+        if not current_user.is_authenticated:
+            return redirect(url_for("auth.login"))
         return redirect(url_for("assets.dashboard"))
 
     with app.app_context():
