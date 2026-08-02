@@ -33,6 +33,12 @@ network, start it with the mDNS launcher (use an elevated PowerShell if port
 python run_inventory_hub.py
 ```
 
+On Windows, [`start_inventory_hub.bat`](start_inventory_hub.bat) provides a
+single-click launcher. It creates `.venv` when needed, installs the packages
+from `requirements.txt`, starts the app and its built-in mDNS responder, then
+opens `http://InventoryHub.local`. Right-click it and choose **Run as
+administrator** when using the default port 80.
+
 This advertises the service through mDNS and runs HTTP on port 80. Devices on
 the same LAN can open `http://InventoryHub.local`; their operating system must
 support mDNS (Windows Bonjour, macOS, iOS, and most Linux distributions do).
