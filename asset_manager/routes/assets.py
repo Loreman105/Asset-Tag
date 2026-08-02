@@ -25,6 +25,7 @@ from asset_manager.utils import (
     DOCUMENT_EXTENSIONS,
     PHOTO_EXTENSIONS,
     ensure_barcode,
+    ensure_qr_code,
     generate_asset_id,
     make_thumbnail,
     save_upload,
@@ -36,6 +37,27 @@ bp = Blueprint("assets", __name__)
 @bp.route("/dashboard")
 @login_required
 def dashboard():
+    from asset_manager.database.models import MaintenanceSchedule
+
+    if current_user.role == Role.VIEWER:
+        viewer_assets = (
+            Asset.query.outerjoin(MaintenanceSchedule, MaintenanceSchedule.asset_id == Asset.id)
+            .filter(Asset.assigned_user_id == current_user.id)
+            .order_by(MaintenanceSchedule.next_due_date.is_(None), MaintenanceSchedule.next_due_date, Asset.asset_id)
+            .all()
+        )
+        schedules = {
+            schedule.asset_id: schedule
+            for schedule in MaintenanceSchedule.query.filter(
+                MaintenanceSchedule.asset_id.in_([asset.id for asset in viewer_assets])
+            ).all()
+        } if viewer_assets else {}
+        return render_template(
+            "dashboard.html",
+            is_viewer_dashboard=True,
+            viewer_assets=[(asset, schedules.get(asset.id)) for asset in viewer_assets],
+        )
+
     total_assets = Asset.query.count()
     status_counts = {
         status: Asset.query.filter_by(status=status).count()
@@ -63,7 +85,6 @@ def dashboard():
         AssetRequestStatus,
         AuditLog,
         Checkout,
-        MaintenanceSchedule,
         Reservation,
         ReservationStatus,
     )
@@ -210,6 +231,7 @@ def detail(asset_id):
         flash("You do not have permission to view that asset.", "danger")
         return redirect(url_for("assets.dashboard"))
     ensure_barcode(asset)
+    ensure_qr_code(asset)
     from asset_manager.database.models import MaintenanceSchedule
 
     return render_template(
@@ -258,6 +280,17 @@ def barcode(asset_id):
     path = ensure_barcode(asset)
     if path is None:
         flash("Barcode dependency is not installed.", "warning")
+        return redirect(url_for("assets.detail", asset_id=asset.asset_id))
+    return send_file(path, mimetype="image/png", as_attachment=request.args.get("download") == "1")
+
+
+@bp.route("/assets/<asset_id>/qr-code")
+@login_required
+def qr_code(asset_id):
+    asset = Asset.query.filter_by(asset_id=asset_id).first_or_404()
+    path = ensure_qr_code(asset)
+    if path is None:
+        flash("QR code dependency is not installed.", "warning")
         return redirect(url_for("assets.detail", asset_id=asset.asset_id))
     return send_file(path, mimetype="image/png", as_attachment=request.args.get("download") == "1")
 

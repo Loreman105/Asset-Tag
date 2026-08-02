@@ -8,13 +8,13 @@ from asset_manager.database.models import Asset, AssetStatus, Checkout, User, ut
 from asset_manager.extensions import db
 from asset_manager.routes.assets import parse_date
 from asset_manager.routes.auth import asset_manager_required
-from asset_manager.utils import condition_worsened
+from asset_manager.utils import asset_code_from_scan, condition_worsened
 
 bp = Blueprint("checkouts", __name__, url_prefix="/checkouts")
 
 
 def find_asset(asset_code):
-    code = asset_code.strip()
+    code = asset_code_from_scan(asset_code)
     return Asset.query.filter((Asset.asset_id == code) | (Asset.barcode_value == code)).first()
 
 

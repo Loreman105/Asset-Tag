@@ -66,7 +66,7 @@
                         <tr>
                             <td><a href="{{ url_for('assets.detail', asset_id=reservation.asset.asset_id) }}">{{ reservation.asset.asset_id }}</a><span class="d-block small text-body-secondary">{{ reservation.asset.description }}</span></td>
                             <td>{{ reservation.event_name }}</td>
-                            <td>{{ reservation.starts_at.strftime('%Y-%m-%d %H:%M') }}<span class="d-block small text-body-secondary">to {{ reservation.ends_at.strftime('%Y-%m-%d %H:%M') }}</span></td>
+                            <td>{{ reservation.starts_at|local_datetime }}<span class="d-block small text-body-secondary">to {{ reservation.ends_at|local_datetime }}</span></td>
                             <td>{{ reservation.reserved_for.full_name }}</td>
                             <td class="text-end">
                                 <form class="d-inline" method="post" action="{{ url_for('reservations.checkout_reserved', reservation_id=reservation.id) }}">

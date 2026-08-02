@@ -59,7 +59,7 @@
                         </td>
                         <td>{{ item.asset.asset_id ~ ' - ' ~ item.asset.description if item.asset else 'Flexible' }}</td>
                         <td>{{ item.requested_by.full_name }}</td>
-                        <td>{{ item.starts_at.strftime('%Y-%m-%d %H:%M') }} to {{ item.ends_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ item.starts_at|local_datetime }} to {{ item.ends_at|local_datetime }}</td>
                         <td><span class="badge text-bg-secondary">{{ item.status }}</span></td>
                         <td class="text-end">
                             {% if current_user.can_manage_assets() and item.status == 'Pending' %}

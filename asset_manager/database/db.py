@@ -15,25 +15,9 @@ from asset_manager.database.models import (
 from asset_manager.extensions import bcrypt, db
 
 
-DEFAULT_PREFIXES = [
-    ("10", "AV"),
-    ("20", "Children's Ministry"),
-    ("30", "Worship"),
-    ("40", "Administration"),
-    ("50", "IT"),
-    ("60", "Facilities"),
-]
+DEFAULT_PREFIXES = []
 
-DEFAULT_CATEGORIES = [
-    "Computer",
-    "Camera",
-    "Audio",
-    "Lighting",
-    "Networking",
-    "Display",
-    "Printer",
-    "Accessory",
-]
+DEFAULT_CATEGORIES = []
 
 DEFAULT_STATUSES = [
     AssetStatus.AVAILABLE,
@@ -60,7 +44,24 @@ def seed_database():
             db.session.add(StatusValue(name=name))
 
     if not Setting.query.filter_by(key="church_name").first():
-        db.session.add(Setting(key="church_name", value="Church Asset Management"))
+        db.session.add(Setting(key="church_name", value="Asset Management"))
+    if not Setting.query.filter_by(key="organization_timezone").first():
+        db.session.add(Setting(key="organization_timezone", value="America/Chicago"))
+    if not Setting.query.filter_by(key="organization_logo").first():
+        db.session.add(Setting(key="organization_logo", value=""))
+    if not Setting.query.filter_by(key="inventory_base_url").first():
+        db.session.add(Setting(key="inventory_base_url", value="http://InventoryHub.local"))
+    for key, value in (("backup_frequency", "disabled"), ("backup_retention", "10"), ("backup_last_run", "")):
+        if not Setting.query.filter_by(key=key).first():
+            db.session.add(Setting(key=key, value=value))
+    for key, value in (
+        ("backup_destination", "local"), ("backup_network_path", ""),
+        ("backup_sftp_host", ""), ("backup_sftp_port", "22"), ("backup_sftp_username", ""), ("backup_sftp_path", ""),
+        ("backup_s3_endpoint", ""), ("backup_s3_region", "us-east-1"), ("backup_s3_bucket", ""), ("backup_s3_prefix", "inventory-hub"), ("backup_s3_access_key", ""),
+        ("backup_remote_status", "Not configured"),
+    ):
+        if not Setting.query.filter_by(key=key).first():
+            db.session.add(Setting(key=key, value=value))
 
     if not User.query.first():
         db.session.add(

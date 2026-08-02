@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Schedule Maintenance - Church Asset Manager{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="h2">Schedule Maintenance</h1>
+        <p class="text-body-secondary mb-0">Set when an active device needs to come in for service.</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="{{ url_for('maintenance.due') }}">Back to Maintenance Due</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" class="row g-3">
+            <div class="col-12">
+                <label class="form-label" for="asset_id">Device</label>
+                <select class="form-select" id="asset_id" name="asset_id" required>
+                    <option value="">Select a device</option>
+                    {% for asset in assets %}
+                    <option value="{{ asset.id }}">{{ asset.asset_id }} — {{ asset.description }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="next_due_date">Maintenance Due Date</label>
+                <input class="form-control" id="next_due_date" type="date" name="next_due_date" min="{{ today }}" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="service_type">Service Type</label>
+                <select class="form-select" id="service_type" name="service_type">
+                    {% for type in types %}<option value="{{ type }}">{{ type }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="frequency_days">Repeat Every (days, optional)</label>
+                <input class="form-control" id="frequency_days" type="number" name="frequency_days" min="1">
+            </div>
+            <div class="col-12">
+                <label class="form-label" for="notes">Notes</label>
+                <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+            </div>
+            <div class="col-12"><button class="btn btn-primary" type="submit">Schedule Maintenance</button></div>
+        </form>
+    </div>
+</div>
+{% endblock %}

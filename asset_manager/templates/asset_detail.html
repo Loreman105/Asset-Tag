@@ -43,6 +43,14 @@
                 </div>
             </div>
         </div>
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <h2 class="h5">QR Code</h2>
+                <img class="qr-code-img" src="{{ url_for('assets.qr_code', asset_id=asset.asset_id) }}" alt="QR code that opens {{ asset.asset_id }}">
+                <p class="small text-body-secondary mb-2">Scan to open this asset’s full record.</p>
+                <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('assets.qr_code', asset_id=asset.asset_id, download='1') }}">Download QR Code</a>
+            </div>
+        </div>
 
         <div class="card mb-4">
             <div class="card-body">
@@ -54,9 +62,9 @@
                         {% for item in asset.checkouts|sort(attribute='checked_out_at', reverse=true) %}
                         <tr class="{% if item.condition_worsened %}table-warning{% endif %}">
                             <td>{{ item.user_receiving.full_name }}</td>
-                            <td>{{ item.checked_out_at.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ item.checked_out_at|local_datetime('%Y-%m-%d') }}</td>
                             <td>{{ item.expected_return_date or '' }}</td>
-                            <td>{{ item.returned_at.strftime('%Y-%m-%d') if item.returned_at else '' }}</td>
+                            <td>{{ item.returned_at|local_datetime('%Y-%m-%d') if item.returned_at else '' }}</td>
                             <td>{{ item.checkout_condition }}{% if item.return_condition %} -> {{ item.return_condition }}{% endif %}</td>
                         </tr>
                         {% else %}

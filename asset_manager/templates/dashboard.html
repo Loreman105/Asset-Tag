@@ -4,7 +4,7 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
         <h1 class="h2">Dashboard</h1>
-        <p class="text-body-secondary mb-0">Inventory health, warranty alerts, and recent system activity.</p>
+        <p class="text-body-secondary mb-0">{% if is_viewer_dashboard %}Your assigned devices, upcoming maintenance, and warranty information.{% else %}Inventory health, warranty alerts, and recent system activity.{% endif %}</p>
     </div>
     {% if current_user.can_manage_assets() %}
     <div class="btn-group">
@@ -14,6 +14,30 @@
     {% endif %}
 </div>
 
+{% if is_viewer_dashboard %}
+<section class="card">
+    <div class="card-body">
+        <h2 class="h5">My Devices</h2>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>Device</th><th>Status</th><th>Maintenance</th><th>Warranty</th></tr></thead>
+                <tbody>
+                {% for asset, schedule in viewer_assets %}
+                <tr>
+                    <td><a href="{{ url_for('assets.detail', asset_id=asset.asset_id) }}"><strong>{{ asset.asset_id }}</strong> {{ asset.description }}</a><span class="d-block small text-body-secondary">{{ asset.current_location or 'No location set' }}</span></td>
+                    <td>{{ asset.status }}</td>
+                    <td>{% if schedule %}Due {{ schedule.next_due_date }}{% if schedule.service_type %}<span class="d-block small text-body-secondary">{{ schedule.service_type }}</span>{% endif %}{% else %}<span class="text-body-secondary">Not scheduled</span>{% endif %}</td>
+                    <td>{% if asset.warranty_expiration_date %}{{ asset.warranty_provider or 'Warranty' }}<span class="d-block small text-body-secondary">Expires {{ asset.warranty_expiration_date }}</span>{% else %}<span class="text-body-secondary">No warranty recorded</span>{% endif %}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" class="text-body-secondary">No devices are assigned to you.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% else %}
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg-2"><div class="metric"><span>Total</span><strong>{{ total_assets }}</strong></div></div>
     {% for label, total in status_counts.items() %}
@@ -74,7 +98,7 @@
                     {% for reservation in upcoming_reservations %}
                     <a class="list-group-item list-group-item-action" href="{{ url_for('assets.detail', asset_id=reservation.asset.asset_id) }}">
                         <strong>{{ reservation.asset.asset_id }}</strong> {{ reservation.event_name }}
-                        <span class="d-block small text-body-secondary">{{ reservation.starts_at.strftime('%Y-%m-%d %H:%M') }} - {{ reservation.reserved_for.full_name }}</span>
+                        <span class="d-block small text-body-secondary">{{ reservation.starts_at|local_datetime }} - {{ reservation.reserved_for.full_name }}</span>
                     </a>
                     {% else %}
                     <p class="text-body-secondary mb-0">No upcoming reservations.</p>
@@ -96,7 +120,7 @@
                             <td>{{ item.action }}</td>
                             <td>{{ item.object_type }} {{ item.object_id }}</td>
                             <td>{{ item.user.full_name if item.user else 'System' }}</td>
-                            <td>{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>{{ item.created_at|local_datetime }}</td>
                         </tr>
                         {% else %}
                         <tr><td colspan="4">No activity yet.</td></tr>
@@ -108,4 +132,5 @@
         </div>
     </section>
 </div>
+{% endif %}
 {% endblock %}

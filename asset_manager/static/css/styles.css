@@ -1,9 +1,22 @@
 body {
+    background: var(--bs-tertiary-bg);
     cursor: default;
     min-height: 100vh;
     -webkit-user-select: none;
     user-select: none;
 }
+
+.app-navbar {
+    background: color-mix(in srgb, var(--bs-body-bg) 94%, transparent);
+    border-bottom: 1px solid var(--bs-border-color);
+    box-shadow: 0 1px 0 rgb(16 24 40 / 4%);
+}
+
+.navbar-brand { font-weight: 700; letter-spacing: -.02em; }
+.brand-mark { align-items: center; background: #2457d6; border-radius: 9px; color: white; display: inline-flex; font-size: .72rem; font-weight: 800; height: 30px; justify-content: center; letter-spacing: .04em; width: 30px; }
+.brand-logo { border-radius: 7px; height: 30px; object-fit: contain; width: 30px; }
+.eyebrow { color: #2457d6; font-size: .75rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.page-heading h1 { font-weight: 750; letter-spacing: -.025em; }
 
 button,
 a,
@@ -56,10 +69,14 @@ textarea,
 .metric {
     background: var(--bs-body-bg);
     border: 1px solid var(--bs-border-color);
-    border-radius: 8px;
+    border-radius: 12px;
     min-height: 112px;
     padding: 16px;
 }
+
+.card { border: 1px solid var(--bs-border-color); border-radius: 12px; box-shadow: 0 1px 2px rgb(16 24 40 / 4%); }
+.btn { border-radius: 8px; font-weight: 600; }
+.form-control, .form-select { border-radius: 8px; }
 
 .metric span {
     color: var(--bs-secondary-color);
@@ -93,6 +110,8 @@ textarea,
 .barcode-img {
     max-width: 100%;
 }
+
+.qr-code-img { image-rendering: pixelated; max-width: 190px; width: 100%; }
 
 .label-preview {
     margin: 0 auto 1.5rem;

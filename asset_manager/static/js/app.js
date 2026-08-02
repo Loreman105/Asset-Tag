@@ -141,3 +141,14 @@ if (selectAllLabels) {
         });
     });
 }
+
+const backupDestinationSelect = document.querySelector('select[name="backup_destination"]');
+if (backupDestinationSelect) {
+    const updateBackupDestinationFields = () => {
+        document.querySelectorAll("[data-backup-destination]").forEach((field) => {
+            field.classList.toggle("d-none", field.dataset.backupDestination !== backupDestinationSelect.value);
+        });
+    };
+    backupDestinationSelect.addEventListener("change", updateBackupDestinationFields);
+    updateBackupDestinationFields();
+}

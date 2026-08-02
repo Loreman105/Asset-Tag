@@ -9,6 +9,7 @@ class Config:
     INSTANCE_DIR = BASE_DIR / "instance"
     UPLOAD_FOLDER = BASE_DIR / "static" / "uploads"
     BARCODE_FOLDER = BASE_DIR / "static" / "barcodes"
+    QR_CODE_FOLDER = BASE_DIR / "static" / "qrcodes"
     BACKUP_FOLDER = BASE_DIR / "backups"
 
     SECRET_KEY = os.environ.get("SECRET_KEY", "change-this-secret-key-before-production")
@@ -16,10 +17,14 @@ class Config:
         "DATABASE_URL", f"sqlite:///{INSTANCE_DIR / 'asset_manager.sqlite3'}"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    MAX_CONTENT_LENGTH = 10 * 1024 * 1024
+    MAX_CONTENT_LENGTH = 256 * 1024 * 1024
     WTF_CSRF_ENABLED = True
 
-    CHURCH_NAME = os.environ.get("CHURCH_NAME", "Church Asset Management")
+    CHURCH_NAME = os.environ.get("CHURCH_NAME", "Asset Management")
+    DEFAULT_TIMEZONE = os.environ.get("INVENTORY_TIMEZONE", "America/Chicago")
+    INVENTORY_HOSTNAME = os.environ.get("INVENTORY_HOSTNAME", "InventoryHub.local")
+    INVENTORY_PORT = int(os.environ.get("INVENTORY_PORT", "80"))
+    INVENTORY_BASE_URL = os.environ.get("INVENTORY_BASE_URL", "http://InventoryHub.local")
     REMEMBER_COOKIE_DURATION_DAYS = 30
     MAIL_SERVER = os.environ.get("MAIL_SERVER")
     MAIL_PORT = int(os.environ.get("MAIL_PORT", "587"))

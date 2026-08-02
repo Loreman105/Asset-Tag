@@ -23,6 +23,49 @@ Then open:
 http://127.0.0.1:5000
 ```
 
+## Inventory Hub local address
+
+To make the server discoverable as `http://InventoryHub.local` on the local
+network, start it with the mDNS launcher (use an elevated PowerShell if port
+80 is reserved on the host):
+
+```powershell
+python run_inventory_hub.py
+```
+
+This advertises the service through mDNS and runs HTTP on port 80. Devices on
+the same LAN can open `http://InventoryHub.local`; their operating system must
+support mDNS (Windows Bonjour, macOS, iOS, and most Linux distributions do).
+You can override the name, port, or QR destination with `INVENTORY_HOSTNAME`,
+`INVENTORY_PORT`, and `INVENTORY_BASE_URL` environment variables.
+
+## QR and Code 128 labels
+
+Each asset record supplies both a Code 128 barcode and a QR code. QR labels
+encode the asset's Inventory Hub URL, so scanning one opens that asset record
+directly. Batch labels include both formats. Set the organization name, logo,
+timezone, and QR base URL in **Admin → Settings**.
+
+## Full system backups
+
+Administrators can download or restore a complete ZIP backup in **Admin →
+Settings → Backups**. It includes all database records, documents, photos,
+branding, QR codes, and barcodes. Restoring replaces the current inventory and
+managed files, so download a fresh backup first.
+
+Set the automatic backup frequency and retention count in the same screen.
+Automatic backups can also be copied to a network share/NAS, an SFTP server,
+or Amazon S3 and S3-compatible storage such as Backblaze B2, Wasabi,
+Cloudflare R2, MinIO, or DigitalOcean Spaces. Configure the selected destination
+and its credentials in **Admin → Settings → Backups**; the credentials are
+encrypted using `SECRET_KEY`, so keep that key stable for future uploads.
+Schedule the following command with Windows Task Scheduler (for example, every
+night) to produce a backup when the configured interval is due:
+
+```powershell
+flask --app asset_manager.app backup-if-due
+```
+
 Default administrator:
 
 ```text

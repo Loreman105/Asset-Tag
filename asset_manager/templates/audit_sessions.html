@@ -46,7 +46,7 @@
                             <td><a href="{{ url_for('reservations.audit_session', session_id=session.id) }}">{{ session.name }}</a></td>
                             <td>{{ session.department or 'All' }}</td>
                             <td>{{ session.status }}</td>
-                            <td>{{ session.started_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>{{ session.started_at|local_datetime }}</td>
                             <td>{{ session.items|length }}</td>
                         </tr>
                         {% else %}

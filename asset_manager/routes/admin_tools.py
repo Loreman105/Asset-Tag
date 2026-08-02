@@ -14,7 +14,7 @@ from asset_manager.database.models import Asset, AssetStatus, Category, Departme
 from asset_manager.extensions import db
 from asset_manager.routes.assets import parse_date
 from asset_manager.routes.auth import roles_required
-from asset_manager.utils import csv_response, ensure_barcode, generate_asset_id
+from asset_manager.utils import csv_response, ensure_barcode, ensure_qr_code, generate_asset_id
 
 bp = Blueprint("admin_tools", __name__, url_prefix="/admin-tools")
 
@@ -187,11 +187,14 @@ def label_pdf(assets):
 
 def draw_label(page, asset, church_name, x, y, label_w, label_h):
     barcode = ensure_barcode(asset)
+    qr_code = ensure_qr_code(asset)
     page.setFont("Helvetica-Bold", 7)
     page.drawString(x + 6, y + label_h - 12, church_name[:34])
     page.setFont("Helvetica", 6)
     page.drawString(x + 6, y + label_h - 22, asset.description[:42])
+    if qr_code:
+        page.drawImage(str(qr_code), x + 6, y + 7, width=48, height=48, preserveAspectRatio=True, mask="auto")
     if barcode:
-        page.drawImage(str(barcode), x + 6, y + 14, width=label_w - 12, height=28, preserveAspectRatio=True)
+        page.drawImage(str(barcode), x + 59, y + 18, width=label_w - 65, height=24, preserveAspectRatio=True)
     page.setFont("Helvetica-Bold", 9)
-    page.drawCentredString(x + label_w / 2, y + 5, asset.asset_id)
+    page.drawCentredString(x + 59 + (label_w - 65) / 2, y + 7, asset.asset_id)

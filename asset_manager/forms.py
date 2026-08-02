@@ -12,6 +12,15 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Sign In")
 
 
+class SignupForm(FlaskForm):
+    first_name = StringField("First Name", validators=[DataRequired(), Length(max=80)])
+    last_name = StringField("Last Name", validators=[DataRequired(), Length(max=80)])
+    email = StringField("Email Address", validators=[DataRequired(), Email(), Length(max=255)])
+    phone = StringField("Phone Number", validators=[DataRequired(), Length(max=40)])
+    password = PasswordField("Password", validators=[DataRequired(), Length(min=10)])
+    submit = SubmitField("Create Viewer Account")
+
+
 class UserForm(FlaskForm):
     first_name = StringField("First Name", validators=[DataRequired()])
     last_name = StringField("Last Name", validators=[DataRequired()])

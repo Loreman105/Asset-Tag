@@ -6,6 +6,7 @@
         <h1 class="h2">Maintenance Due</h1>
         <p class="text-body-secondary mb-0">Scheduled service due today or coming soon.</p>
     </div>
+    <a class="btn btn-primary" href="{{ url_for('maintenance.schedule') }}">Schedule Maintenance</a>
 </div>
 
 {% macro table_for(items, empty_text) %}
