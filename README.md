@@ -1,4 +1,4 @@
-# Church Asset Management System
+# Asset Management System
 
 A Flask-based system for managing church-owned electronic equipment, checkouts, maintenance, warranties, barcode labels, reports, users, and audit logs.
 
