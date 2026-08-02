@@ -74,7 +74,7 @@
                     {% for reservation in upcoming_reservations %}
                     <a class="list-group-item list-group-item-action" href="{{ url_for('assets.detail', asset_id=reservation.asset.asset_id) }}">
                         <strong>{{ reservation.asset.asset_id }}</strong> {{ reservation.event_name }}
-                        <span class="d-block small text-body-secondary">{{ reservation.starts_at.strftime('%Y-%m-%d %H:%M') }} - {{ reservation.reserved_for.full_name }}</span>
+                        <span class="d-block small text-body-secondary">{{ reservation.starts_at|local_datetime }} - {{ reservation.reserved_for.full_name }}</span>
                     </a>
                     {% else %}
                     <p class="text-body-secondary mb-0">No upcoming reservations.</p>
@@ -96,7 +96,7 @@
                             <td>{{ item.action }}</td>
                             <td>{{ item.object_type }} {{ item.object_id }}</td>
                             <td>{{ item.user.full_name if item.user else 'System' }}</td>
-                            <td>{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>{{ item.created_at|local_datetime }}</td>
                         </tr>
                         {% else %}
                         <tr><td colspan="4">No activity yet.</td></tr>

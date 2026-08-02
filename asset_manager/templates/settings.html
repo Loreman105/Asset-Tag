@@ -1,16 +1,19 @@
 {% extends "base.html" %}
 {% block title %}Settings - Church Asset Manager{% endblock %}
 {% block content %}
-<h1 class="h2 mb-3">Settings</h1>
+<div class="page-heading mb-4"><p class="eyebrow mb-1">Administration</p><h1 class="h2 mb-1">Organization settings</h1><p class="text-body-secondary mb-0">Set the name, identity, clock, and address your team sees on every inventory page.</p></div>
 <div class="row g-4">
     <section class="col-lg-6">
         <div class="card card-body mb-4">
-            <h2 class="h5">Church</h2>
-            <form method="post" class="row g-2">
+            <h2 class="h5">Organization profile</h2>
+            <form method="post" enctype="multipart/form-data" class="row g-3">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="action" value="church">
-                <div class="col"><input class="form-control" name="church_name" value="{{ church_name }}"></div>
-                <div class="col-auto"><button class="btn btn-primary">Save</button></div>
+                <input type="hidden" name="action" value="organization">
+                <div class="col-12"><label class="form-label">Organization name</label><input class="form-control" name="organization_name" value="{{ organization_name }}" required></div>
+                <div class="col-md-6"><label class="form-label">Timezone</label><input class="form-control" name="timezone" value="{{ timezone_name }}" placeholder="America/Chicago" required><div class="form-text">Use an IANA timezone, e.g. America/New_York.</div></div>
+                <div class="col-md-6"><label class="form-label">Organization logo</label><input class="form-control" type="file" name="organization_logo" accept="image/png,image/jpeg,image/webp">{% if organization_logo %}<div class="form-text">A logo is currently active.</div>{% endif %}</div>
+                <div class="col-12"><label class="form-label">Inventory Hub address</label><input class="form-control" name="inventory_base_url" value="{{ inventory_base_url }}" required><div class="form-text">QR labels use this address to open the asset page. Keep it as <code>http://InventoryHub.local</code> when using the included mDNS launcher.</div></div>
+                <div class="col-12"><button class="btn btn-primary">Save organization settings</button></div>
             </form>
         </div>
         <div class="card card-body">

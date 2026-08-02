@@ -1,16 +1,19 @@
 """Application factory for the Church Asset Management System."""
 
 import sys
+from datetime import timezone
 from pathlib import Path
 
 if __package__ is None:
     sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from flask import Flask, redirect, url_for
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from asset_manager.config import Config
 from asset_manager.database.db import seed_database
 from asset_manager.extensions import bcrypt, csrf, db, login_manager, migrate
+from asset_manager.utils import setting_value
 from asset_manager.routes.assets import bp as assets_bp
 from asset_manager.routes.auth import bp as auth_bp
 from asset_manager.routes.checkouts import bp as checkouts_bp
@@ -29,7 +32,7 @@ def create_app(config_object=Config):
     app = Flask(__name__)
     app.config.from_object(config_object)
 
-    for path_key in ("INSTANCE_DIR", "UPLOAD_FOLDER", "BARCODE_FOLDER", "BACKUP_FOLDER"):
+    for path_key in ("INSTANCE_DIR", "UPLOAD_FOLDER", "BARCODE_FOLDER", "QR_CODE_FOLDER", "BACKUP_FOLDER"):
         Path(app.config[path_key]).mkdir(parents=True, exist_ok=True)
 
     db.init_app(app)
@@ -50,6 +53,25 @@ def create_app(config_object=Config):
     app.register_blueprint(settings_bp)
     app.register_blueprint(users_bp)
     register_reservation_cli(app)
+
+    @app.context_processor
+    def organization_context():
+        return {
+            "organization_name": setting_value("church_name", app.config["CHURCH_NAME"]),
+            "organization_logo": setting_value("organization_logo"),
+        }
+
+    @app.template_filter("local_datetime")
+    def local_datetime(value, format_string="%Y-%m-%d %H:%M"):
+        if not value:
+            return ""
+        timezone_name = setting_value("organization_timezone", app.config["DEFAULT_TIMEZONE"])
+        try:
+            if value.tzinfo is None:
+                value = value.replace(tzinfo=timezone.utc)
+            return value.astimezone(ZoneInfo(timezone_name)).strftime(format_string)
+        except (ZoneInfoNotFoundError, ValueError):
+            return value.strftime(format_string)
 
     @app.route("/")
     def index():

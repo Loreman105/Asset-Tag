@@ -23,6 +23,29 @@ Then open:
 http://127.0.0.1:5000
 ```
 
+## Inventory Hub local address
+
+To make the server discoverable as `http://InventoryHub.local` on the local
+network, start it with the mDNS launcher (use an elevated PowerShell if port
+80 is reserved on the host):
+
+```powershell
+python run_inventory_hub.py
+```
+
+This advertises the service through mDNS and runs HTTP on port 80. Devices on
+the same LAN can open `http://InventoryHub.local`; their operating system must
+support mDNS (Windows Bonjour, macOS, iOS, and most Linux distributions do).
+You can override the name, port, or QR destination with `INVENTORY_HOSTNAME`,
+`INVENTORY_PORT`, and `INVENTORY_BASE_URL` environment variables.
+
+## QR and Code 128 labels
+
+Each asset record supplies both a Code 128 barcode and a QR code. QR labels
+encode the asset's Inventory Hub URL, so scanning one opens that asset record
+directly. Batch labels include both formats. Set the organization name, logo,
+timezone, and QR base URL in **Admin → Settings**.
+
 Default administrator:
 
 ```text

@@ -27,6 +27,7 @@ from asset_manager.database.models import (
 from asset_manager.extensions import db
 from asset_manager.routes.assets import parse_date
 from asset_manager.routes.auth import asset_manager_required, roles_required
+from asset_manager.utils import asset_code_from_scan
 
 bp = Blueprint("reservations", __name__, url_prefix="/reservations")
 
@@ -197,7 +198,7 @@ def audits():
 def audit_session(session_id):
     session = InventoryAuditSession.query.get_or_404(session_id)
     if request.method == "POST":
-        asset_code = request.form["asset_code"].strip()
+        asset_code = asset_code_from_scan(request.form["asset_code"])
         asset = Asset.query.filter((Asset.asset_id == asset_code) | (Asset.barcode_value == asset_code)).first()
         if not asset:
             flash(f"Asset {asset_code} was not found.", "danger")

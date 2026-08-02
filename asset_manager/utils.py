@@ -5,13 +5,14 @@ import uuid
 from datetime import date
 from io import BytesIO, StringIO
 from pathlib import Path
+from urllib.parse import unquote, urlparse
 
 from flask import current_app
 from PIL import Image
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
-from asset_manager.database.models import Asset, DepartmentPrefix
+from asset_manager.database.models import Asset, DepartmentPrefix, Setting
 from asset_manager.extensions import db
 
 PHOTO_EXTENSIONS = {"jpg", "jpeg", "png", "webp"}
@@ -72,6 +73,44 @@ def make_thumbnail(image_path):
 
 def barcode_path(asset):
     return Path(current_app.config["BARCODE_FOLDER"]) / f"{asset.asset_id}.png"
+
+
+def qr_code_path(asset):
+    return Path(current_app.config["QR_CODE_FOLDER"]) / f"{asset.asset_id}.png"
+
+
+def setting_value(key, default=""):
+    setting = Setting.query.filter_by(key=key).first()
+    return setting.value if setting and setting.value is not None else default
+
+
+def asset_qr_url(asset):
+    base_url = setting_value("inventory_base_url", current_app.config["INVENTORY_BASE_URL"]).rstrip("/")
+    return f"{base_url}/assets/{asset.asset_id}"
+
+
+def ensure_qr_code(asset):
+    path = qr_code_path(asset)
+    if path.exists():
+        return path
+    try:
+        import qrcode
+    except ImportError:
+        return None
+    image = qrcode.make(asset_qr_url(asset))
+    image.save(path)
+    return path
+
+
+def asset_code_from_scan(value):
+    """Return the asset ID from an ID/barcode value or an asset QR URL."""
+    value = (value or "").strip()
+    parsed = urlparse(value)
+    if parsed.scheme and parsed.path:
+        parts = [unquote(part) for part in parsed.path.split("/") if part]
+        if len(parts) >= 2 and parts[-2] == "assets":
+            return parts[-1]
+    return value
 
 
 def ensure_barcode(asset):

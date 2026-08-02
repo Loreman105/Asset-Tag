@@ -61,6 +61,12 @@ def seed_database():
 
     if not Setting.query.filter_by(key="church_name").first():
         db.session.add(Setting(key="church_name", value="Church Asset Management"))
+    if not Setting.query.filter_by(key="organization_timezone").first():
+        db.session.add(Setting(key="organization_timezone", value="America/Chicago"))
+    if not Setting.query.filter_by(key="organization_logo").first():
+        db.session.add(Setting(key="organization_logo", value=""))
+    if not Setting.query.filter_by(key="inventory_base_url").first():
+        db.session.add(Setting(key="inventory_base_url", value="http://InventoryHub.local"))
 
     if not User.query.first():
         db.session.add(
