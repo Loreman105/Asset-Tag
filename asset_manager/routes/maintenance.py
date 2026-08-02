@@ -69,6 +69,44 @@ def due():
     return render_template("maintenance_due.html", due_now=due_now, upcoming=upcoming, later=later, today=today)
 
 
+@bp.route("/schedule", methods=("GET", "POST"))
+@asset_manager_required
+def schedule():
+    types = [
+        MaintenanceType.INSPECTION,
+        MaintenanceType.REPAIR,
+        MaintenanceType.UPGRADE,
+        MaintenanceType.CLEANING,
+        MaintenanceType.WARRANTY_SERVICE,
+    ]
+    assets = Asset.query.filter(Asset.status != AssetStatus.RETIRED).order_by(Asset.asset_id).all()
+    if request.method == "POST":
+        asset = Asset.query.get(request.form.get("asset_id"))
+        next_due_date = parse_date(request.form.get("next_due_date"))
+        frequency_value = request.form.get("frequency_days", "").strip()
+
+        if not asset or not next_due_date:
+            flash("Choose an asset and enter a valid maintenance due date.", "danger")
+        elif frequency_value and (not frequency_value.isdigit() or int(frequency_value) < 1):
+            flash("Maintenance frequency must be a positive number of days.", "danger")
+        else:
+            schedule = MaintenanceSchedule.query.filter_by(asset_id=asset.id).first()
+            if schedule is None:
+                schedule = MaintenanceSchedule(asset=asset)
+                db.session.add(schedule)
+            schedule.next_due_date = next_due_date
+            schedule.frequency_days = int(frequency_value) if frequency_value else None
+            schedule.service_type = request.form.get("service_type") or MaintenanceType.INSPECTION
+            schedule.notes = request.form.get("notes", "").strip() or None
+            schedule.updated_by_id = current_user.id
+            db.session.commit()
+            log_activity(current_user.id, "Maintenance Scheduled", "Asset", asset.asset_id, f"Due {next_due_date}")
+            flash(f"Maintenance for {asset.asset_id} is scheduled for {next_due_date}.", "success")
+            return redirect(url_for("maintenance.due"))
+
+    return render_template("maintenance_schedule.html", assets=assets, types=types, today=date.today().isoformat())
+
+
 def update_schedule_from_form(asset, record):
     next_due_date = parse_date(request.form.get("next_due_date"))
     frequency_days = request.form.get("frequency_days")

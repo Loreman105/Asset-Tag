@@ -42,6 +42,7 @@
                             <li><a class="dropdown-item" href="{{ url_for('reservations.audits') }}">Audit Mode</a></li>
                         </ul>
                     </li>
+                    {% if current_user.is_authenticated and current_user.role == 'administrator' %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Admin</a>
                         <ul class="dropdown-menu">
@@ -56,6 +57,7 @@
                             {% endif %}
                         </ul>
                     </li>
+                    {% endif %}
                     {% else %}
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('asset_requests.index') }}">Requests</a></li>
                     {% endif %}

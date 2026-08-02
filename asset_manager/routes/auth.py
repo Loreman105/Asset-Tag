@@ -9,7 +9,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 from asset_manager.database.db import log_activity
 from asset_manager.database.models import Role, User
 from asset_manager.extensions import bcrypt, db
-from asset_manager.forms import LoginForm
+from asset_manager.forms import LoginForm, SignupForm
 
 bp = Blueprint("auth", __name__)
 
@@ -49,6 +49,34 @@ def login():
             return redirect(request.args.get("next") or url_for("assets.dashboard"))
         flash("Invalid email or password.", "danger")
     return render_template("login.html", form=form)
+
+
+@bp.route("/signup", methods=("GET", "POST"))
+def signup():
+    if current_user.is_authenticated:
+        return redirect(url_for("assets.dashboard"))
+
+    form = SignupForm()
+    if form.validate_on_submit():
+        email = form.email.data.strip().lower()
+        if User.query.filter_by(email=email).first():
+            form.email.errors.append("An account with this email address already exists.")
+        else:
+            user = User(
+                first_name=form.first_name.data.strip(),
+                last_name=form.last_name.data.strip(),
+                email=email,
+                phone=form.phone.data.strip(),
+                password_hash=bcrypt.generate_password_hash(form.password.data).decode("utf-8"),
+                role=Role.VIEWER,
+            )
+            db.session.add(user)
+            db.session.commit()
+            log_activity(user.id, "Account Creation", "User", user.id, "Viewer self-registration")
+            login_user(user)
+            flash("Your Viewer account has been created.", "success")
+            return redirect(url_for("assets.dashboard"))
+    return render_template("signup.html", form=form)
 
 
 @bp.route("/logout")

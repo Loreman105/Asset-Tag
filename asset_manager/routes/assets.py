@@ -37,6 +37,27 @@ bp = Blueprint("assets", __name__)
 @bp.route("/dashboard")
 @login_required
 def dashboard():
+    from asset_manager.database.models import MaintenanceSchedule
+
+    if current_user.role == Role.VIEWER:
+        viewer_assets = (
+            Asset.query.outerjoin(MaintenanceSchedule, MaintenanceSchedule.asset_id == Asset.id)
+            .filter(Asset.assigned_user_id == current_user.id)
+            .order_by(MaintenanceSchedule.next_due_date.is_(None), MaintenanceSchedule.next_due_date, Asset.asset_id)
+            .all()
+        )
+        schedules = {
+            schedule.asset_id: schedule
+            for schedule in MaintenanceSchedule.query.filter(
+                MaintenanceSchedule.asset_id.in_([asset.id for asset in viewer_assets])
+            ).all()
+        } if viewer_assets else {}
+        return render_template(
+            "dashboard.html",
+            is_viewer_dashboard=True,
+            viewer_assets=[(asset, schedules.get(asset.id)) for asset in viewer_assets],
+        )
+
     total_assets = Asset.query.count()
     status_counts = {
         status: Asset.query.filter_by(status=status).count()
@@ -64,7 +85,6 @@ def dashboard():
         AssetRequestStatus,
         AuditLog,
         Checkout,
-        MaintenanceSchedule,
         Reservation,
         ReservationStatus,
     )
