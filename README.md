@@ -42,6 +42,10 @@ administrator** when using the default port 80.
 This advertises the service through mDNS and runs HTTP on port 80. Devices on
 the same LAN can open `http://InventoryHub.local`; their operating system must
 support mDNS (Windows Bonjour, macOS, iOS, and most Linux distributions do).
+The Windows firewall must allow Python on **Private** networks, and the client
+must be on the same Wi-Fi/LAN (not a guest network with client isolation). The
+Windows launcher adds the required Private-network firewall rules when it is
+run as an administrator.
 You can override the name, port, or QR destination with `INVENTORY_HOSTNAME`,
 `INVENTORY_PORT`, and `INVENTORY_BASE_URL` environment variables.
 
@@ -75,7 +79,7 @@ flask --app asset_manager.app backup-if-due
 Default administrator:
 
 ```text
-Email: admin@church.local
+Email: admin@managment.local
 Password: admin123456
 ```
 

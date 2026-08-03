@@ -14,3 +14,4 @@ psycopg[binary]>=3.1,<4.0
 boto3>=1.35,<2.0
 paramiko>=3.5,<4.0
 cryptography>=43.0,<45.0
+zeroconf>=0.146,<1.0

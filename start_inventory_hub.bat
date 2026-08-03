@@ -32,6 +32,17 @@ if errorlevel 1 goto :setup_failed
 ".venv\Scripts\python.exe" -m pip install -r requirements.txt
 if errorlevel 1 goto :setup_failed
 
+net session >nul 2>&1
+if errorlevel 1 (
+    echo.
+    echo WARNING: Run this file as Administrator to add the required Windows Firewall rules.
+    echo          Other devices may not be able to reach the app or resolve InventoryHub.local.
+) else (
+    echo Allowing Inventory Hub through Windows Firewall on Private networks...
+    netsh advfirewall firewall add rule name="Inventory Hub - HTTP" dir=in action=allow protocol=TCP localport=80 profile=private >nul
+    netsh advfirewall firewall add rule name="Inventory Hub - mDNS" dir=in action=allow protocol=UDP localport=5353 profile=private >nul
+)
+
 echo Starting Inventory Hub and mDNS discovery...
 start "Inventory Hub" /D "%CD%" cmd /k ".venv\Scripts\python.exe run_inventory_hub.py"
 

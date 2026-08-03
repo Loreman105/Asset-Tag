@@ -68,7 +68,7 @@ def seed_database():
             User(
                 first_name="System",
                 last_name="Administrator",
-                email="admin@church.local",
+                email="admin@managment.local",
                 password_hash=bcrypt.generate_password_hash("admin123456").decode("utf-8"),
                 role=Role.ADMIN,
             )
